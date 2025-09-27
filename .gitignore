@@ -1,0 +1,48 @@
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+vyxoz-app/node_modules/
+
+#packages
+vyxoz-app/package-lock.json
+vyxoz-app/yarn.lock
+
+vyxoz-app/.vscode/
+# Expo
+vyxoz-app/.expo/
+vyxoz-app/dist/
+vyxoz-app/web-build/
+vyxoz-app/expo-env.d.ts
+
+# Native
+vyxoz-app/.kotlin/
+vyxoz-app/*.orig.*
+vyxoz-app/*.jks
+vyxoz-app/*.p8
+vyxoz-app/*.p12
+vyxoz-app/*.key
+vyxoz-app/*.mobileprovision
+
+# Metro
+vyxoz-app/.metro-health-check*
+
+# debug
+vyxoz-app/npm-debug.*
+vyxoz-app/yarn-debug.*
+vyxoz-app/yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# local env files
+vyxoz-app/.env*.local
+
+# typescript
+vyxoz-app/*.tsbuildinfo
+
+vyxoz-app/app-example
+
+# generated native folders
+vyxoz-app/ios
+vyxoz-app/android
