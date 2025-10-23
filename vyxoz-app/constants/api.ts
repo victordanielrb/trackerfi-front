@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.79:3000',
+  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.66:3000',
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',

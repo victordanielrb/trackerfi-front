@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useAuth } from '../contexts/AuthContext';
 import { router } from 'expo-router';
-import DebugInfo from '../components/DebugInfo';
+// debug/test UI removed for production
 
 // Web-safe alert function
 const showAlert = (title: string, message: string) => {
@@ -33,12 +33,12 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [lastTestUser, setLastTestUser] = useState<{email: string, password: string} | null>(null);
+  
   const { login, register, isLoading, isAuthenticated } = useAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(tabs)');
+      router.replace('/portfolio');
     }
   }, [isAuthenticated]);
 
@@ -52,7 +52,7 @@ export default function LoginScreen() {
 
       const result = await login(email, password);
       if (result.success) {
-        router.replace('/(tabs)');
+        router.replace('/portfolio');
       } else {
         showAlert('Login Failed', result.message);
       }
@@ -89,37 +89,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleTestRegister = async () => {
-    const testUsername = `testuser_${Date.now()}`;
-    const testEmail = `test${Date.now()}@example.com`;
-    const testPassword = 'test123456';
-
-    // Store the test user credentials for login later
-    setLastTestUser({ email: testEmail, password: testPassword });
-
-    // Fill form fields 
-    setUsername(testUsername);
-    setEmail(testEmail);
-    setPassword(testPassword);
-    setConfirmPassword(testPassword);
-    setIsLoginMode(false);
-
-    // Auto-submit after a brief delay
-    setTimeout(async () => {
-      const result = await register(testUsername, testEmail, testPassword);
-      if (result.success) {
-        showAlert('Test Registration Success', `Created user: ${testUsername}\nEmail: ${testEmail}\nYou can now use Test Login!`);
-        setIsLoginMode(true);
-        // Clear form
-        setUsername('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-      } else {
-        showAlert('Test Registration Failed', result.message);
-      }
-    }, 500);
-  };
+  
 
   const toggleMode = () => {
     setIsLoginMode(!isLoginMode);
@@ -130,26 +100,7 @@ export default function LoginScreen() {
     setConfirmPassword('');
   };
 
-  const handleTestLogin = async () => {
-    // Use the last registered test user if available, otherwise use the fallback
-    const testEmail = lastTestUser?.email || 'test@example.com';
-    const testPassword = lastTestUser?.password || 'test123456';
-
-    // Fill form fields
-    setEmail(testEmail);
-    setPassword(testPassword);
-    setIsLoginMode(true);
-
-    // Auto-submit after a brief delay
-    setTimeout(async () => {
-      const result = await login(testEmail, testPassword);
-      if (result.success) {
-        showAlert('Test Login Success', 'Logged in with test account');
-      } else {
-        showAlert('Test Login Failed', `${result.message}\n\nTip: Try creating a test user first!`);
-      }
-    }, 500);
-  };
+  
 
   return (
     <KeyboardAvoidingView 
@@ -242,35 +193,7 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
 
-          {/* Debug Info - Only show in development */}
-          {__DEV__ && <DebugInfo />}
-
-          {/* Test Buttons - Only show in development */}
-          {__DEV__ && (
-            <View style={styles.testButtonsContainer}>
-              <Text style={styles.testSectionTitle}>🚀 Quick Test Actions</Text>
-              
-              <TouchableOpacity
-                style={[styles.testButton, styles.testRegisterButton]}
-                onPress={handleTestRegister}
-                disabled={isLoading}
-              >
-                <Text style={styles.testButtonText}>
-                  ⚡ Create Test User
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.testButton, styles.testLoginButton]}
-                onPress={handleTestLogin}
-                disabled={isLoading}
-              >
-                <Text style={styles.testButtonText}>
-                  🔑 Login {lastTestUser ? 'with Test User' : 'with Default User'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          )}
+          {/* Debug and test buttons removed */}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
