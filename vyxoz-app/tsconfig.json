@@ -3,10 +3,16 @@
   "compilerOptions": {
     "strict": true,
     "paths": {
-      "@/*": [
-        "./*"
-      ]
-    }
+      "@/*": ["*"],
+      "@/app/*": ["app/*"],
+      "@/components/*": ["components/*"],
+      "@/constants/*": ["constants/*"],
+      "@/contexts/*": ["contexts/*"],
+      "@/hooks/*": ["hooks/*"],
+      "@/assets/*": ["assets/*"]
+    },
+    "baseUrl": ".",
+    "typeRoots": ["./node_modules/@types", "./.expo/types"]
   },
   "include": [
     "**/*.ts",
