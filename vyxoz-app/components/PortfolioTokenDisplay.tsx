@@ -9,6 +9,8 @@ import {
   RefreshControl
 } from 'react-native';
 import { TrackedWalletToken } from '../hooks/useWalletTracking';
+import { useTranslation } from 'react-i18next';
+import { useSettings } from '../contexts/SettingsContext';
 
 interface PortfolioTokenDisplayProps {
   tokens: TrackedWalletToken[];
@@ -31,6 +33,25 @@ export default function PortfolioTokenDisplay({
 }: PortfolioTokenDisplayProps) {
 
   const [sortBy, setSortBy] = useState<SortOption>('value');
+  const { t } = useTranslation();
+  const { currency, prices } = useSettings();
+
+  const currencySymbol = (() => {
+    switch (currency) {
+      case 'BRL': return 'R$';
+      case 'EUR': return '€';
+      default: return '$';
+    }
+  })();
+
+  const convert = (usdValue?: number | string) => {
+    const v = typeof usdValue === 'string' ? parseFloat(usdValue) : (usdValue || 0);
+    if (!v) return 0;
+    if (currency === 'USD') return v;
+    if (currency === 'BRL' && prices?.brl) return v * prices.brl;
+    if (currency === 'EUR' && prices?.eur) return v * prices.eur;
+    return v;
+  };
 
   const getChainColor = (chain: string) => {
     const chainUpper = chain?.toUpperCase();
@@ -111,14 +132,14 @@ export default function PortfolioTokenDisplay({
 
   const renderSortButtons = () => (
     <View style={styles.sortContainer}>
-      <Text style={styles.sortTitle}>Sort by:</Text>
+      <Text style={styles.sortTitle}>{t('sort_by')}</Text>
       <View style={styles.sortButtons}>
         {[
-          { key: 'value', short: 'Holdings' },
-          { key: 'balance', short: 'Quantity' },
-          { key: 'performance', short: '24h%' },
-          { key: 'alphabetical', short: 'Name' },
-          { key: 'chain', short: 'Chain' }
+          { key: 'value', short: t('holdings') },
+          { key: 'balance', short: t('quantity') },
+          { key: 'performance', short: t('24h_percent') },
+          { key: 'alphabetical', short: t('name') },
+          { key: 'chain', short: t('chain') }
         ].map((option) => (
           <TouchableOpacity
             key={option.key}
@@ -167,11 +188,11 @@ export default function PortfolioTokenDisplay({
           {/* Token Price */}
           {item.price && !isNaN(parseFloat(item.price.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Price</Text>
+              <Text style={styles.valueLabel}>{t('price')}</Text>
               <Text style={styles.priceText}>
-                ${parseFloat(item.price.toString()).toLocaleString(undefined, {
+                {currencySymbol}{convert(item.price).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 8
+                  maximumFractionDigits: 2
                 })}
               </Text>
             </View>
@@ -180,7 +201,7 @@ export default function PortfolioTokenDisplay({
           {/* Token Quantity */}
           {item.quantity && !isNaN(parseFloat(item.quantity.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Quantity</Text>
+              <Text style={styles.valueLabel}>{t('quantity')}</Text>
               <Text style={styles.balanceText}>
                 {parseFloat(item.quantity.toString()).toLocaleString(undefined, {
                   minimumFractionDigits: 0,
@@ -193,9 +214,9 @@ export default function PortfolioTokenDisplay({
           {/* Holdings (USD Value) */}
           {item.value && !isNaN(parseFloat(item.value.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Holdings</Text>
+              <Text style={styles.valueLabel}>{t('holdings')}</Text>
               <Text style={styles.valueText}>
-                ${parseFloat(item.value.toString()).toLocaleString(undefined, {
+                {currencySymbol}{convert(item.value).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
@@ -206,7 +227,7 @@ export default function PortfolioTokenDisplay({
 
         {/* Performance Row */}
         <View style={styles.performanceRow}>
-          <Text style={styles.performanceLabel}>24h Change:</Text>
+          <Text style={styles.performanceLabel}>{t('24h_change')}</Text>
           <Text style={[
             styles.performanceText,
             performance >= 0 ? styles.performancePositive : styles.performanceNegative
@@ -217,12 +238,12 @@ export default function PortfolioTokenDisplay({
 
         {/* Addresses */}
         <Text style={styles.addressText} numberOfLines={1}>
-          Contract: {item.address || 'N/A'}
+          {t('contract')}: {item.address || 'N/A'}
         </Text>
         
         {showWalletAddress && (
           <Text style={styles.addressText} numberOfLines={1}>
-            Wallet: {item.wallet_address || 'N/A'}
+            {t('wallet')}: {item.wallet_address || 'N/A'}
           </Text>
         )}
       </TouchableOpacity>
@@ -232,7 +253,7 @@ export default function PortfolioTokenDisplay({
   const renderBlockchainSection = ({ item }: { item: [string, TrackedWalletToken[]] }) => {
     const [blockchain, blockchainTokens] = item;
     const totalValue = blockchainTokens.reduce((sum, token) => {
-      return sum + (parseFloat(token.value?.toString() || '0'));
+      return sum + convert(parseFloat(token.value?.toString() || '0'));
     }, 0);
     
     return (
@@ -243,13 +264,13 @@ export default function PortfolioTokenDisplay({
             <Text style={styles.blockchainTitle}>{blockchain}</Text>
           </View>
           <View style={styles.blockchainStats}>
-            <Text style={styles.tokenCount}>{blockchainTokens.length} tokens</Text>
-            <Text style={styles.blockchainValue}>
-              ${totalValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </Text>
+            <Text style={styles.tokenCount}>{blockchainTokens.length} {t('tokens')}</Text>
+              <Text style={styles.blockchainValue}>
+                {currencySymbol}{totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </Text>
           </View>
         </View>
         
@@ -268,7 +289,7 @@ export default function PortfolioTokenDisplay({
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading portfolio...</Text>
+  <Text style={styles.loadingText}>{t('loading_portfolio')}</Text>
       </View>
     );
   }
@@ -278,7 +299,7 @@ export default function PortfolioTokenDisplay({
       <View style={styles.centerContainer}>
         <Text style={styles.errorText}>⚠️ {error}</Text>
         <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t('retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -287,8 +308,8 @@ export default function PortfolioTokenDisplay({
   if (tokens.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyText}>No tokens found</Text>
-        <Text style={styles.emptySubtext}>Track wallets to see your portfolio</Text>
+        <Text style={styles.emptyText}>{t('no_tokens_found')}</Text>
+        <Text style={styles.emptySubtext}>{t('track_wallets_to_see_portfolio')}</Text>
       </View>
     );
   }
@@ -408,10 +429,10 @@ const styles = StyleSheet.create({
   // Token Cards
   tokenCard: {
     backgroundColor: '#fff',
-    marginHorizontal: 16,
+    marginHorizontal: 14,
     marginVertical: 6,
     borderRadius: 12,
-    padding: 16,
+    padding: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

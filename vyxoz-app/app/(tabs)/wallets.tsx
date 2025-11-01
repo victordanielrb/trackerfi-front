@@ -12,6 +12,7 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWalletTracking } from '../../hooks/useWalletTracking';
+import { useTranslation } from 'react-i18next';
 import AddTrackedWalletForm from '../../components/AddTrackedWalletForm';
 import ConfirmDialog from '../../components/ConfirmDialog';
 
@@ -47,6 +48,7 @@ export default function WalletsScreen() {
     removeTrackedWallet,
     refetch
   } = useWalletTracking();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -71,9 +73,9 @@ export default function WalletsScreen() {
     try {
       await removeTrackedWallet(confirmDialog.address, confirmDialog.chain);
       setConfirmDialog({ visible: false, address: '', chain: '' });
-      showAlert('Success', 'Wallet removed from tracking list');
+      showAlert(t('success'), t('wallet_removed_from_tracking'));
     } catch (error: any) {
-      showAlert('Error', error.message || 'Failed to remove wallet');
+      showAlert(t('error'), error.message || t('failed_remove_wallet'));
     }
   };
 
@@ -95,7 +97,7 @@ export default function WalletsScreen() {
           onPress={() => showDeleteConfirmation(item.address, item.chain)}
           style={styles.deleteButton}
         >
-          <Text style={styles.deleteButtonText}>Remove</Text>
+          <Text style={styles.deleteButtonText}>{t('remove')}</Text>
         </TouchableOpacity>
       </View>
       
@@ -104,7 +106,7 @@ export default function WalletsScreen() {
       </Text>
       
       <Text style={styles.walletNote}>
-        Tracking wallet across all supported blockchains
+        {t('tracking_wallet_note')}
       </Text>
     </View>
   );
@@ -122,7 +124,7 @@ export default function WalletsScreen() {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading tracked wallets...</Text>
+        <Text style={styles.loadingText}>{t('loading_tracked_wallets')}</Text>
       </View>
     );
   }
@@ -130,19 +132,19 @@ export default function WalletsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Manage Wallets</Text>
+  <Text style={styles.title}>{t('manage_wallets')}</Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity
             style={styles.portfolioButton}
-            onPress={() => router.push('/(tabs)/portfolio')}
+            onPress={() => router.push('/portfolio')}
           >
-            <Text style={styles.portfolioButtonText}>📊 View Portfolio</Text>
+            <Text style={styles.portfolioButtonText}>📊 {t('view_portfolio')}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={styles.addButtonText}>+ Track Wallet</Text>
+            <Text style={styles.addButtonText}>+ {t('track_wallet')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -151,16 +153,16 @@ export default function WalletsScreen() {
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity style={styles.retryButton} onPress={refetch}>
-            <Text style={styles.retryButtonText}>Retry</Text>
+            <Text style={styles.retryButtonText}>{t('retry')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
       {trackedWallets.length === 0 ? (
         <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No wallets tracked</Text>
+          <Text style={styles.emptyText}>{t('no_wallets_tracked')}</Text>
           <Text style={styles.emptySubtext}>
-            Track any wallet address to monitor their tokens
+            {t('track_any_wallet_to_monitor')}
           </Text>
         </View>
       ) : (
@@ -195,10 +197,10 @@ export default function WalletsScreen() {
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         visible={confirmDialog.visible}
-        title="Remove Tracked Wallet"
-        message={`Stop tracking this wallet?\n\n${confirmDialog.address}`}
-        confirmText="Remove"
-        cancelText="Cancel"
+        title={t('remove_tracked_wallet')}
+        message={t('remove_tracked_wallet_message', { address: confirmDialog.address })}
+        confirmText={t('remove')}
+        cancelText={t('cancel')}
         onConfirm={handleRemoveWallet}
         onCancel={() => setConfirmDialog({ visible: false, address: '', chain: '' })}
       />

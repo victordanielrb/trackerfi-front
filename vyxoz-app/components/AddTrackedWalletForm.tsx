@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -30,29 +31,30 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
   onAddWallet,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [address, setAddress] = useState('');
   const [chain, setChain] = useState('EVM');
   const [loading, setLoading] = useState(false);
 
   const chains = [
-    { label: 'Evm', value: 'EVM' },
-    { label: 'Solana', value: 'SOLANA' },
-    { label: 'Sui', value: 'SUI' },
+    { label: t('evm'), value: 'EVM' },
+    { label: t('solana'), value: 'SOLANA' },
+    { label: t('sui'), value: 'SUI' },
   ];
 
   const handleAddWallet = async () => {
     if (!address.trim()) {
-      showAlert('Error', 'Please enter a wallet address');
+      showAlert(t('error'), t('please_enter_wallet_address'));
       return;
     }
 
     try {
       setLoading(true);
       await onAddWallet(address.trim(), chain);
-      setAddress('');
-      showAlert('Success', 'Wallet added to tracking list');
+  setAddress('');
+  showAlert(t('success'), t('wallet_added_to_tracking'));
     } catch (error: any) {
-      showAlert('Error', error.message || 'Failed to add wallet');
+      showAlert(t('error'), error.message || t('failed_add_wallet'));
     } finally {
       setLoading(false);
     }
@@ -60,28 +62,28 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add Wallet to Track</Text>
+      <Text style={styles.title}>{t('add_wallet_to_track')}</Text>
       <Text style={styles.subtitle}>
-        Track any wallet address across different blockchains
+        {t('track_any_wallet_across_blockchains')}
       </Text>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Wallet Address</Text>
+  <Text style={styles.label}>{t('wallet_address')}</Text>
         <TextInput
           style={styles.input}
           value={address}
           onChangeText={setAddress}
-          placeholder="Enter wallet address (0x... or base58)"
+          placeholder={t('enter_wallet_address')}
           placeholderTextColor="#999"
           multiline={false}
           autoCapitalize="none"
           autoCorrect={false}
         />
 
-        <Text style={styles.label}>Blockchain</Text>
+  <Text style={styles.label}>{t('blockchain')}</Text>
         <View style={styles.chainSelector}>
           {chains.map((chainOption) => (
-            <TouchableOpacity
+        <TouchableOpacity
               key={chainOption.value}
               style={[
                 styles.chainOption,
@@ -107,7 +109,7 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
             onPress={onCancel}
             disabled={loading}
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -116,7 +118,7 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
             disabled={loading}
           >
             <Text style={styles.addButtonText}>
-              {loading ? 'Adding...' : 'Add Wallet'}
+              {loading ? t('adding') : t('add_wallet')}
             </Text>
           </TouchableOpacity>
         </View>

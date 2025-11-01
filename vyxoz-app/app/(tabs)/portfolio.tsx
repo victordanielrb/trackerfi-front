@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -11,11 +12,20 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWalletTracking } from '../../hooks/useWalletTracking';
 import PortfolioTokenDisplay from '../../components/PortfolioTokenDisplay';
+import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HomeScreen() {
   const { isAuthenticated, user, logout } = useAuth();
+  const { t } = useTranslation();
   const router = useRouter();
-  
+  const { currency, prices } = useSettings();
+  const currencySymbol = (() => {
+    switch (currency) {
+      case 'BRL': return 'R$';
+      case 'EUR': return '€';
+      default: return '$';
+    }
+  })();
   const {
     trackedWallets,
     tokens,
@@ -35,8 +45,16 @@ export default function HomeScreen() {
   }
 
   const getTotalValue = () => {
+    const conv = (v?: number) => {
+      if (!v) return 0;
+      if (currency === 'USD') return v;
+      if (currency === 'BRL' && prices?.brl) return v * prices.brl;
+      if (currency === 'EUR' && prices?.eur) return v * prices.eur;
+      return v;
+    };
+
     return tokens.reduce((total, token) => {
-      return total + (token.value || 0);
+      return total + conv(Number(token.value || 0));
     }, 0);
   };
 
@@ -53,76 +71,76 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.welcomeText}>Welcome back</Text>
-          <Text style={styles.usernameText}>{user?.username || 'User'}</Text>
+          <Text style={styles.welcomeText}>{t('welcome_back')}</Text>
+          <Text style={styles.usernameText}>{user?.username || t('user')}</Text>
         </View>
         <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t('logout')}</Text>
         </TouchableOpacity>
       </View>
 
       {/* Portfolio Summary */}
       <View style={styles.summaryContainer}>
-        <Text style={styles.sectionTitle}>Portfolio Overview</Text>
+  <Text style={styles.sectionTitle}>{t('portfolio_overview')}</Text>
         <View style={styles.statCard}>
             <Text style={styles.statValue}>
-              ${getTotalValue().toLocaleString(undefined, {
+              {currencySymbol}{getTotalValue().toLocaleString(undefined, {
                 minimumFractionDigits: 2,
                 maximumFractionDigits: 2
               })}
             </Text>
-            <Text style={styles.statLabel}>Total Value</Text>
+            <Text style={styles.statLabel}>{t('total_value')}</Text>
           </View>
         <View style={styles.statsGrid}>
           
           
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{getWalletCount()}</Text>
-            <Text style={styles.statLabel}>Tracked Wallets</Text>
+            <Text style={styles.statLabel}>{t('tracked_wallets')}</Text>
           </View>
           
           <View style={styles.statCard}>
             <Text style={styles.statValue}>{getTokenCount()}</Text>
-            <Text style={styles.statLabel}>Total Tokens</Text>
+            <Text style={styles.statLabel}>{t('total_tokens')}</Text>
           </View>
         </View>
       </View>
 
       {/* Quick Actions */}
       <View style={styles.actionsContainer}>
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
+  <Text style={styles.sectionTitle}>{t('quick_actions')}</Text>
         <View style={styles.actionButtons}>
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => router.push('/(tabs)/wallets')}
+            onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>📁 Manage Wallets</Text>
+            <Text style={styles.actionButtonText}>📁 {t('manage_wallets')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={refreshTokens}
           >
-            <Text style={styles.actionButtonText}>🔄 Refresh Data</Text>
+            <Text style={styles.actionButtonText}>🔄 {t('refresh_data')}</Text>
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Token Portfolio */}
       <View style={styles.portfolioContainer}>
-        <Text style={styles.sectionTitle}>Token Holdings</Text>
+  <Text style={styles.sectionTitle}>{t('token_holdings')}</Text>
         
         {trackedWallets.length === 0 ? (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyTitle}>No Wallets Tracked</Text>
+            <Text style={styles.emptyTitle}>{t('no_wallets_tracked')}</Text>
             <Text style={styles.emptySubtitle}>
-              Add wallets to track to see your portfolio
+              {t('add_wallets_to_see_portfolio')}
             </Text>
             <TouchableOpacity 
               style={styles.addWalletButton}
-              onPress={() => router.push('/(tabs)/wallets')}
+              onPress={() => router.push('/wallets')}
             >
-              <Text style={styles.addWalletButtonText}>+ Track Your First Wallet</Text>
+              <Text style={styles.addWalletButtonText}>+ {t('track_first_wallet')}</Text>
             </TouchableOpacity>
           </View>
         ) : (
@@ -209,6 +227,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    padding: 4,
     color: '#666',
     textAlign: 'center',
   },

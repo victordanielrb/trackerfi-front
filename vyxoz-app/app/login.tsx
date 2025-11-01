@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -28,6 +29,7 @@ const showAlert = (title: string, message: string) => {
 };
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -110,20 +112,20 @@ export default function LoginScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>
-            {isLoginMode ? 'Welcome Back' : 'Create Account'}
+            {isLoginMode ? t('login_title') : t('register_title')}
           </Text>
           <Text style={styles.subtitle}>
-            {isLoginMode ? 'Sign in to continue' : 'Sign up to get started'}
+            {isLoginMode ? t('login_subtitle') : t('register_subtitle')}
           </Text>
 
           {!isLoginMode && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>{t('username')}</Text>
               <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Enter your username"
+                placeholder={t('username')}
                 placeholderTextColor="#999"
                 autoCapitalize="none"
               />
@@ -131,12 +133,12 @@ export default function LoginScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('email')}</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t('email')}
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -145,12 +147,12 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('password')}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Enter your password"
+              placeholder={t('password')}
               placeholderTextColor="#999"
               secureTextEntry
               autoComplete="password"
@@ -159,12 +161,12 @@ export default function LoginScreen() {
 
           {!isLoginMode && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>{t('confirm_password')}</Text>
               <TextInput
                 style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Confirm your password"
+                placeholder={t('confirm_password')}
                 placeholderTextColor="#999"
                 secureTextEntry
               />
@@ -180,7 +182,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isLoginMode ? 'Sign In' : 'Sign Up'}
+                {isLoginMode ? t('sign_in') : t('sign_up')}
               </Text>
             )}
           </TouchableOpacity>
@@ -188,8 +190,8 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={toggleMode} style={styles.toggleButton}>
             <Text style={styles.toggleButtonText}>
               {isLoginMode
-                ? "Don't have an account? Sign Up"
-                : 'Already have an account? Sign In'}
+                ? t('dont_have_account')
+                : t('already_have_account')}
             </Text>
           </TouchableOpacity>
 
@@ -204,6 +206,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  languageSelector: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    flexDirection: 'row',
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: 20,
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  langButton: {
+    marginHorizontal: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    backgroundColor: '#eee',
+  },
+  langButtonActive: {
+    backgroundColor: '#007AFF',
+  },
+  langText: {
+    fontWeight: 'bold',
+    color: '#333',
   },
   scrollContainer: {
     flexGrow: 1,
