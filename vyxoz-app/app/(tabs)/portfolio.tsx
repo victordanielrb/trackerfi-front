@@ -7,6 +7,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
@@ -61,6 +62,13 @@ export default function HomeScreen() {
   const getWalletCount = () => trackedWallets.length;
   const getTokenCount = () => tokens.length;
 
+  const exportPortfolioPDF = () => {
+    // TODO: implement PDF export. Placeholder for now.
+    Alert.alert(t('export_pdf'), t('export_pdf') + ' — TODO');
+    // Future implementation: collect visible portfolio data, render to PDF
+    // and trigger share / save flow.
+  };
+
   return (
     <ScrollView 
       style={styles.container}
@@ -114,14 +122,21 @@ export default function HomeScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>📁 {t('manage_wallets')}</Text>
+            <Text style={styles.actionButtonText}>📁  > </Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={refreshTokens}
           >
-            <Text style={styles.actionButtonText}>🔄 {t('refresh_data')}</Text>
+            <Text style={styles.actionButtonText}>🔄</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.exportButton}
+            onPress={exportPortfolioPDF}
+          >
+            <Text style={styles.exportButtonText}>📄 > </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -257,6 +272,21 @@ const styles = StyleSheet.create({
   },
   actionButtonText: {
     color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  exportButton: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  exportButtonText: {
+    color: '#007AFF',
     fontWeight: '600',
     fontSize: 14,
   },

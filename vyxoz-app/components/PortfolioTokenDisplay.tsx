@@ -137,7 +137,6 @@ export default function PortfolioTokenDisplay({
         {[
           { key: 'value', short: t('holdings') },
           { key: 'balance', short: t('quantity') },
-          { key: 'performance', short: t('24h_percent') },
           { key: 'alphabetical', short: t('name') },
           { key: 'chain', short: t('chain') }
         ].map((option) => (

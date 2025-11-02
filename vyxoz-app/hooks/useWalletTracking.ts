@@ -144,8 +144,10 @@ export const useWalletTracking = () => {
   }, [user, token, fetchTrackedWallets]);
 
   const refreshTokens = useCallback(async () => {
+    // Refresh both tracked wallets and tokens for complete portfolio update
+    await fetchTrackedWallets();
     return await fetchTokensFromTrackedWallets();
-  }, [fetchTokensFromTrackedWallets]);
+  }, [fetchTrackedWallets, fetchTokensFromTrackedWallets]);
 
   // Auto-fetch on user change
   useEffect(() => {
@@ -157,17 +159,6 @@ export const useWalletTracking = () => {
       setTokens([]);
     }
   }, [user, token, fetchTrackedWallets, fetchTokensFromTrackedWallets]);
-
-  // Auto-refresh tokens every 5 minutes
-  useEffect(() => {
-    if (!user || !token || trackedWallets.length === 0) return;
-
-    const interval = setInterval(() => {
-      fetchTokensFromTrackedWallets();
-    }, 5 * 60 * 1000); // 5 minutes
-
-    return () => clearInterval(interval);
-  }, [user, token, trackedWallets.length, fetchTokensFromTrackedWallets]);
 
   return {
     trackedWallets,

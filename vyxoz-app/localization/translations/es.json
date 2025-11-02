@@ -70,4 +70,61 @@
   "loading_portfolio": "Cargando portafolio...",
   "no_tokens_found": "No se encontraron tokens",
   "track_wallets_to_see_portfolio": "Rastrea carteras para ver tu portafolio"
+  ,
+  "learn_title": "Aprender",
+  "learn_section_blockchain_title": "Cómo funciona la blockchain",
+  "learn_section_blockchain_p1": "Una blockchain es un libro mayor distribuido y sólo se puede añadir, replicado en muchos nodos. Las transacciones se agrupan en bloques; cada bloque referencia el hash del bloque anterior, creando una cadena inmutable.",
+  "learn_section_blockchain_p2": "Ideas clave: descentralización, consenso (Prueba de Trabajo / Prueba de Participación), inmutabilidad y firmas criptográficas.",
+
+  "learn_section_investing_title": "Cómo invertir en crypto",
+  "learn_section_investing_p1": "Invertir en crypto requiere investigación, gestión de riesgos y diversificación. Empieza pequeño y comprende el propósito del token, su liquidez y el equipo. Usa promediado de coste en dólares (DCA) para reducir el riesgo de timing.",
+  "learn_bullet_dyor": "Haz tu propia investigación (DYOR)",
+  "learn_bullet_onchain_metrics": "Entiende las métricas on-chain y la tokenómica",
+  "learn_bullet_hardware_wallets": "Usa hardware wallets para grandes cantidades (custodia propia)",
+
+  "learn_section_defi_title": "DeFi (Finanzas Descentralizadas)",
+  "learn_section_defi_p1": "DeFi son aplicaciones financieras construidas sobre blockchains que permiten prestar, pedir prestado, comerciar y yield farming sin intermediarios. Componentes comunes: AMMs, protocolos de préstamo y stablecoins.",
+  "learn_section_defi_p2": "Los riesgos incluyen fallos en contratos inteligentes, impermanent loss y manipulación de oráculos. Prefiere protocolos auditados y entiende cómo se aseguran los fondos.",
+
+  "learn_section_web3_title": "Web3 y dApps",
+  "learn_section_web3_p1": "Web3 se refiere a aplicaciones descentralizadas (dApps) que se ejecutan en blockchains. Eliminan puntos únicos de control y habilitan nuevas experiencias como gobernanza basada en tokens.",
+  "learn_section_web3_p2": "Al usar dApps, siempre verifica la URL, conéctate con una wallet segura y revisa los detalles de la transacción antes de aprobar.",
+
+  "learn_section_custody_title": "Autocustodia y wallets",
+  "learn_section_custody_p1": "La autocustodia significa que controlas las claves privadas de tus fondos. Hardware wallets (Ledger, Trezor) son las más seguras para almacenamiento a largo plazo. Software wallets (MetaMask, WalletConnect) son cómodas pero más expuestas.",
+  "learn_bullet_never_share_seed": "Nunca compartas tu frase semilla",
+  "learn_bullet_use_passphrase": "Usa passphrases/encriptación de seed para mayor seguridad",
+  "learn_section_custody_p2": "Considera dividir los fondos entre almacenamiento en frío (hardware) y wallets calientes para uso diario.",
+
+  "learn_learn_more": "Más información"
+  ,
+  "learn_section_bitcoin_title": "Bitcoin",
+  "learn_section_bitcoin_p1": "Bitcoin es la primera y más conocida criptomoneda. Introdujo el concepto de moneda digital descentralizada asegurada por Proof of Work y una red global de mineros.",
+  "learn_section_bitcoin_p2": "Bitcoin suele usarse como reserva de valor; entiende su límite de suministro, métricas on-chain y las diferencias con plataformas de contratos inteligentes.",
+
+  "learn_section_wallets_title": "Carteras (software & hardware)",
+  "learn_section_wallets_p1": "Las carteras son interfaces que almacenan tus claves y te permiten interactuar con blockchains. Las carteras de software (móvil/extensión) son convenientes; las hardware son más seguras para almacenamiento a largo plazo.",
+  "learn_section_wallets_p2": "Al elegir una cartera, considera la seguridad, opciones de recuperación, cadenas soportadas e integración con dApps"
+  ,
+  "learn_link_en": "English",
+  "learn_link_pt": "Português",
+  "learn_link_es": "Español",
+
+  "learn_section_custody_diff": "Diferencias: Bitcoin usa el modelo UTXO y carteras nativas de Bitcoin; las cadenas EVM usan un modelo de cuenta y tokens basados en contratos inteligentes. La custodia en BTC se centra en gestionar claves privadas y UTXO, mientras que la custodia EVM incluye aprobar contratos y gestionar allowances.",
+  "learn_section_custody_bluewallet_title": "Autocustodia con BlueWallet (BTC)",
+  "learn_section_custody_bluewallet_steps_p1": "BlueWallet es una cartera móvil que gestiona claves en el dispositivo. Para autocustodiar: crea una nueva wallet, guarda la seed de forma segura, activa passphrase si deseas y utiliza las herramientas incorporadas para recibir/enviar BTC.",
+
+  "learn_section_investing_p2": "Las exchanges permiten comprar y vender cripto (exchanges centralizados requieren KYC) y puedes retirar a tu wallet personal para autocustodia. Los mercados P2P permiten intercambios entre usuarios. Siempre mueve fondos de exchanges a tu wallet para almacenamiento a largo plazo y verifica las direcciones antes de retirar."
+  ,
+  "export_pdf": "Exportar PDF",
+  "market_data_title": "Datos de Mercado",
+  "global_crypto_metrics": "Métricas globales de criptomonedas",
+  "loading_market_data": "Cargando datos de mercado...",
+  "market_overview": "Resumen del Mercado",
+  "total_market_cap": "Cap. de Mercado Total",
+  "volume_24h": "Volumen 24h",
+  "market_cap_change_24h": "Cambio Cap. 24h",
+  "active_cryptocurrencies": "Criptos Activas",
+  "market_dominance": "Dominancia del Mercado",
+  "exchange_rates": "Tipos de Cambio"
 }

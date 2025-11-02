@@ -70,5 +70,62 @@
   "loading_portfolio": "Loading portfolio...",
   "no_tokens_found": "No tokens found",
   "track_wallets_to_see_portfolio": "Track wallets to see your portfolio"
+  ,
+  "learn_title": "Learn",
+  "learn_section_blockchain_title": "How blockchain works",
+  "learn_section_blockchain_p1": "A blockchain is a distributed, append-only ledger replicated across many nodes. Transactions are grouped into blocks; each block references the previous block's hash, creating an immutable chain.",
+  "learn_section_blockchain_p2": "Key ideas: decentralization, consensus (Proof of Work / Proof of Stake), immutability, and cryptographic signatures.",
+
+  "learn_section_investing_title": "How to invest in crypto",
+  "learn_section_investing_p1": "Investing in crypto requires research, risk management and diversification. Start small and understand the token's purpose, liquidity, and team. Use dollar-cost averaging (DCA) to reduce timing risk.",
+  "learn_bullet_dyor": "Do your own research (DYOR)",
+  "learn_bullet_onchain_metrics": "Understand on-chain metrics and tokenomics",
+  "learn_bullet_hardware_wallets": "Use hardware wallets for large holdings (self custody)",
+
+  "learn_section_defi_title": "DeFi (Decentralized Finance)",
+  "learn_section_defi_p1": "DeFi are financial applications built on blockchains that allow lending, borrowing, trading and yield farming without intermediaries. Common components: AMMs, lending protocols, and stablecoins.",
+  "learn_section_defi_p2": "Risks include smart contract bugs, impermanent loss, and oracle manipulation. Prefer audited protocols and understand how funds are secured.",
+
+  "learn_section_web3_title": "Web3 & dApps",
+  "learn_section_web3_p1": "Web3 refers to decentralized applications (dApps) that run on blockchains. They remove single points of control and enable new UX like token-based governance and composable protocols.",
+  "learn_section_web3_p2": "When using dApps, always verify the URL, connect with a secure wallet, and review transaction details before approving.",
+
+  "learn_section_custody_title": "Self-custody & wallets",
+  "learn_section_custody_p1": "Self custody means you control the private keys to your funds. Hardware wallets (Ledger, Trezor) are the safest for long-term storage. Software wallets (MetaMask, WalletConnect) are convenient but more exposed.",
+  "learn_bullet_never_share_seed": "Never share your seed phrase",
+  "learn_bullet_use_passphrase": "Use passphrases/seed encryption for extra security",
+  "learn_section_custody_p2": "Consider splitting funds between cold storage (hardware) and hot wallets for daily use.",
+
+  "learn_learn_more": "Learn more"
+  ,
+  "learn_section_bitcoin_title": "Bitcoin",
+  "learn_section_bitcoin_p1": "Bitcoin is the first and most well-known cryptocurrency. It introduced the concept of a decentralized digital currency secured by Proof of Work and a global network of miners.",
+  "learn_section_bitcoin_p2": "Bitcoin is often used as a store of value; understand its supply cap, on-chain metrics, and the differences between Bitcoin and smart-contract platforms.",
+
+  "learn_section_wallets_title": "Wallets (software & hardware)",
+  "learn_section_wallets_p1": "Wallets are interfaces that hold your keys and let you interact with blockchains. Software wallets (mobile/extension) are convenient for daily use; hardware wallets are the safest for long-term storage.",
+  "learn_section_wallets_p2": "When choosing a wallet, consider security, recovery options, supported chains, and integration with dApps"
+  ,
+  "learn_link_en": "English",
+  "learn_link_pt": "Português",
+  "learn_link_es": "Español",
+
+  "learn_section_custody_diff": "Differences: Bitcoin uses UTXO model and native Bitcoin wallets; EVM chains (Ethereum and compatibles) use account model and smart-contract based tokens (ERC-20). Custody on BTC focuses on managing private keys and UTXO selection, while EVM custody also includes approving contracts and managing token allowances.",
+  "learn_section_custody_bluewallet_title": "Auto-custody with BlueWallet (BTC)",
+  "learn_section_custody_bluewallet_steps_p1": "BlueWallet is a mobile Bitcoin wallet that supports on-device key management. To self-custody with BlueWallet: create a new wallet, securely back up the seed phrase, optionally enable passphrase, and use the built-in on-chain tools to receive and send BTC.",
+
+  "learn_section_investing_p2": "Exchanges let you buy/sell crypto (centralized exchanges - KYC) and you can withdraw to your personal wallet for self custody. P2P marketplaces allow direct trades between users. Always move funds from exchanges to your wallet for long-term storage and verify addresses carefully before withdrawing."
+  ,
+  "export_pdf": "Export PDF",
+  "market_data_title": "Market Data",
+  "global_crypto_metrics": "Global cryptocurrency metrics",
+  "loading_market_data": "Loading market data...",
+  "market_overview": "Market Overview",
+  "total_market_cap": "Total Market Cap",
+  "volume_24h": "24h Volume",
+  "market_cap_change_24h": "Market Cap 24h",
+  "active_cryptocurrencies": "Active Cryptos",
+  "market_dominance": "Market Dominance",
+  "exchange_rates": "Exchange Rates"
 }
 
