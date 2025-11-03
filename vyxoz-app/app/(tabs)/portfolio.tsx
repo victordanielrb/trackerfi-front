@@ -12,7 +12,9 @@ import {
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWalletTracking } from '../../hooks/useWalletTracking';
+import { useFuturesPositions } from '../../hooks/useFuturesPositions';
 import PortfolioTokenDisplay from '../../components/PortfolioTokenDisplay';
+import FuturesPositionsDisplay from '../../components/FuturesPositionsDisplay';
 import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HomeScreen() {
@@ -34,6 +36,14 @@ export default function HomeScreen() {
     error,
     refreshTokens,
   } = useWalletTracking();
+
+  const {
+    positions: futuresPositions,
+    loading: futuresLoading,
+    error: futuresError,
+    errors: futuresErrors,
+    refetch: refetchFutures,
+  } = useFuturesPositions();
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -62,6 +72,12 @@ export default function HomeScreen() {
   const getWalletCount = () => trackedWallets.length;
   const getTokenCount = () => tokens.length;
 
+  const refreshAll = async () => {
+    await Promise.all([
+      refreshTokens(),
+      refetchFutures()
+    ]);
+  };
   const exportPortfolioPDF = () => {
     // TODO: implement PDF export. Placeholder for now.
     Alert.alert(t('export_pdf'), t('export_pdf') + ' — TODO');
@@ -73,7 +89,7 @@ export default function HomeScreen() {
     <ScrollView 
       style={styles.container}
       refreshControl={
-        <RefreshControl refreshing={loading} onRefresh={refreshTokens} />
+        <RefreshControl refreshing={loading || futuresLoading} onRefresh={refreshAll} />
       }
     >
       {/* Header */}
@@ -122,12 +138,12 @@ export default function HomeScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>📁  > </Text>
+            <Text style={styles.actionButtonText}>📁 {t('manage_wallets')}</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={refreshTokens}
+            onPress={refreshAll}
           >
             <Text style={styles.actionButtonText}>🔄</Text>
           </TouchableOpacity>
@@ -136,9 +152,22 @@ export default function HomeScreen() {
             style={styles.exportButton}
             onPress={exportPortfolioPDF}
           >
-            <Text style={styles.exportButtonText}>📄 > </Text>
+            <Text style={styles.exportButtonText}>📄 {t('export_pdf')}</Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* Futures Positions */}
+      <View style={styles.portfolioContainer}>
+        <Text style={styles.sectionTitle}>{t('futures_positions')}</Text>
+        
+        <FuturesPositionsDisplay
+          positions={futuresPositions}
+          loading={futuresLoading}
+          error={futuresError}
+          errors={futuresErrors || []}
+          onRefresh={refetchFutures}
+        />
       </View>
 
       {/* Token Portfolio */}
