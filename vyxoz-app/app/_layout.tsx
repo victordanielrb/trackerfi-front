@@ -12,7 +12,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 
 export const unstable_settings = {
   // The initial route name can be used to control the root index route
-  initialRouteName: 'index',
+  initialRouteName: '(tabs)/portfolio',
 };
 
 export default function RootLayout() {
@@ -21,11 +21,11 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme == 'dark' ? DefaultTheme : DarkTheme}>
         <SettingsProvider>
           {/* Global Settings (language + currency) Selector */}
           <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
+    
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />

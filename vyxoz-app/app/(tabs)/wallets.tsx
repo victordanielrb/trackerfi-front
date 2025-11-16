@@ -105,12 +105,7 @@ export default function WalletsScreen() {
     try {
       await addExchange(name, apiKey, apiSecret);
       setExchangeModalVisible(false);
-      // ensure UI reflects new exchange
-      try {
-        await refetchExchanges();
-      } catch (e) {
-        console.warn('refetchExchanges failed after add:', e);
-      }
+      // addExchange already calls fetchExchanges internally, no need for manual refetch
     } catch (error: any) {
       throw error; // Let AddExchangeForm handle the error display
     }
@@ -121,8 +116,7 @@ export default function WalletsScreen() {
       await updateExchange(exchangeId, apiKey, apiSecret);
       setEditExchangeModal({ visible: false, exchange: null });
       showAlert(t('success'), t('exchange_updated'));
-      // refresh list
-      try { await refetchExchanges(); } catch (e) { console.warn('refetchExchanges failed after update:', e); }
+      // updateExchange already calls fetchExchanges internally, no need for manual refetch
     } catch (error: any) {
       showAlert(t('error'), error.message || t('failed_update_exchange'));
     }
@@ -143,8 +137,7 @@ export default function WalletsScreen() {
       await removeExchange(exchangeConfirmDialog.exchangeId);
       setExchangeConfirmDialog({ visible: false, exchangeId: '', exchangeName: '' });
       showAlert(t('success'), t('exchange_removed'));
-      // refresh list
-      try { await refetchExchanges(); } catch (e) { console.warn('refetchExchanges failed after remove:', e); }
+      // removeExchange already calls fetchExchanges internally, no need for manual refetch
     } catch (error: any) {
       showAlert(t('error'), error.message || t('failed_remove_exchange'));
     }
