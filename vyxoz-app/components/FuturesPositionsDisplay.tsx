@@ -28,7 +28,7 @@ export default function FuturesPositionsDisplay({
   const { t } = useTranslation();
 
   const getPositionTypeText = (type: number) => {
-    return type === 1 ? 'LONG' : 'SHORT';
+    return type === 1 ? t('long') : t('short');
   };
 
   const getPositionTypeColor = (type: number) => {

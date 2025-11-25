@@ -12,6 +12,7 @@
   "dont_have_account": "Não tem uma conta? Registrar",
   "already_have_account": "Já tem uma conta? Entrar"
   ,
+  "top_assets": "Principais Ativos",
   "welcome_back": "Bem-vindo de volta",
   "user": "Usuário",
   "portfolio_overview": "Visão geral do portfólio",
@@ -117,6 +118,8 @@
   "learn_section_investing_p2": "Exchanges permitem comprar/vender crypto (exchanges centralizadas - KYC) e você pode retirar para sua carteira pessoal para autocustódia. Mercados P2P permitem negociações diretas entre usuários. Sempre mova fundos das exchanges para sua carteira para armazenamento de longo prazo e verifique cuidadosamente os endereços antes de sacar."
   ,
   "export_pdf": "Exportar PDF",
+  "share_portfolio": "Compartilhar Portfólio",
+  "track_your_crypto_portfolio": "Monitore seu portfólio cripto",
   "market_data_title": "Dados de Mercado",
   "global_crypto_metrics": "Métricas globais de criptomoedas",
   "loading_market_data": "Carregando dados de mercado...",
@@ -160,5 +163,43 @@
   "remove_exchange_message": "Remover esta exchange e todas suas credenciais API?\n\n{{exchange}}",
   "please_enter_exchange_name": "Por favor, digite o nome da exchange",
   "api_key_required": "Chave API é obrigatória",
-  "api_secret_required": "Segredo API é obrigatório"
+  "api_secret_required": "Segredo API é obrigatório",
+  
+  "futures_positions": "Posições de Futuros",
+  "loading_futures_positions": "Carregando posições de futuros...",
+  "no_futures_positions": "Sem Posições de Futuros",
+  "no_futures_positions_description": "Você não tem posições de futuros abertas em suas exchanges conectadas.",
+  "exchange_errors": "Erros de Exchange",
+  "some_exchanges_failed": "Algumas exchanges falharam ao carregar",
+  "size": "Tamanho",
+  "entry_price": "Preço de Entrada",
+  "liquidation_price": "Preço de Liquidação",
+  "leverage": "Alavancagem",
+  "realized_pnl": "PnL Realizado",
+  "open_date": "Data de Abertura",
+  "loading_credentials": "Carregando credenciais para edição...",
+  
+  "long": "COMPRA",
+  "short": "VENDA",
+  
+  "news": {
+    "title": "📰 Notícias",
+    "subtitle": "Acesse as principais fontes de notícias crypto e financeiras",
+    "cryptoNews": "Crypto News",
+    "generalEconomy": "Economia Geral",
+    "tapToAccess": "💡 Toque em qualquer card para acessar a fonte",
+    "error": "Erro",
+    "cannotOpen": "Não foi possível abrir {{source}}. Verifique sua conexão com a internet.",
+    "failedToOpen": "Erro ao tentar abrir {{source}}",
+    "ok": "OK"
+  },
+  
+  "tabs": {
+    "portfolio": "Portfólio",
+    "wallets": "Carteiras",
+    "market": "Mercado",
+    "tokens": "Tokens",
+    "news": "Notícias",
+    "learn": "Aprender"
+  }
 }

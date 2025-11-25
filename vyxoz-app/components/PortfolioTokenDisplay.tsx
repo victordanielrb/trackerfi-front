@@ -235,15 +235,17 @@ export default function PortfolioTokenDisplay({
           </Text>
         </View>
 
-        {/* Addresses */}
-        <Text style={styles.addressText} numberOfLines={1}>
-          {t('contract')}: {item.address || 'N/A'}
-        </Text>
-        
+        {/* Addresses - keep raw strings out of Views by using explicit Text children */}
+        <View style={styles.addressRow}>
+          <Text style={styles.addressLabel}>{t('contract') + ':'}</Text>
+          <Text style={styles.addressValue} numberOfLines={1}>{item.address || 'N/A'}</Text>
+        </View>
+
         {showWalletAddress && (
-          <Text style={styles.addressText} numberOfLines={1}>
-            {t('wallet')}: {item.wallet_address || 'N/A'}
-          </Text>
+          <View style={styles.addressRow}>
+            <Text style={styles.addressLabel}>{t('wallet') + ':'}</Text>
+            <Text style={styles.addressValue} numberOfLines={1}>{item.wallet_address || 'N/A'}</Text>
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -540,6 +542,24 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'monospace',
     marginBottom: 2,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  addressLabel: {
+    fontSize: 11,
+    color: '#666',
+    marginRight: 6,
+    fontWeight: '600'
+  },
+  addressValue: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    flex: 1
   },
 
   // Blockchain Sections

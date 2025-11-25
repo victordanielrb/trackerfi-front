@@ -9,6 +9,7 @@ import LanguageCurrencySelector from '../components/LanguageCurrencySelector';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
 
 export const unstable_settings = {
   // The initial route name can be used to control the root index route
@@ -21,6 +22,8 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
+      {/* Simple websocket client that logs incoming alert messages */}
+      <WebsocketLogger />
       <ThemeProvider value={colorScheme == 'dark' ? DefaultTheme : DarkTheme}>
         <SettingsProvider>
           {/* Global Settings (language + currency) Selector */}
@@ -37,6 +40,31 @@ export default function RootLayout() {
       </ThemeProvider>
     </AuthProvider>
   );
+}
+
+function WebsocketLogger() {
+  useEffect(() => {
+    try {
+      const ws = new WebSocket('ws://localhost:3000/ws');
+      ws.onopen = () => console.log('WS connected to backend');
+      ws.onmessage = (ev) => {
+        try {
+          const data = JSON.parse(ev.data as string);
+          console.log('WS message:', data);
+        } catch (e) {
+          console.log('WS raw message:', ev.data);
+        }
+      };
+      ws.onerror = (e) => console.warn('WS error', e);
+      ws.onclose = () => console.log('WS closed');
+      // identify as anonymous client for now (no user id). If you have auth, send {type:'hello', userId}
+      ws.addEventListener('open', () => ws.send(JSON.stringify({ type: 'hello', userId: 'anonymous' })));
+      return () => { ws.close(); };
+    } catch (e) {
+      console.warn('WS init failed', e);
+    }
+  }, []);
+  return null;
 }
 
 const styles = StyleSheet.create({

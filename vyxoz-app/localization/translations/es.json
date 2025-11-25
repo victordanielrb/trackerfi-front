@@ -12,6 +12,7 @@
   "dont_have_account": "¿No tienes una cuenta? Regístrate",
   "already_have_account": "¿Ya tienes una cuenta? Inicia sesión"
   ,
+  "top_assets": "Principales Activos",
   "welcome_back": "Bienvenido de nuevo",
   "user": "Usuario",
   "portfolio_overview": "Resumen del Portafolio",
@@ -117,6 +118,8 @@
   "learn_section_investing_p2": "Las exchanges permiten comprar y vender cripto (exchanges centralizados requieren KYC) y puedes retirar a tu wallet personal para autocustodia. Los mercados P2P permiten intercambios entre usuarios. Siempre mueve fondos de exchanges a tu wallet para almacenamiento a largo plazo y verifica las direcciones antes de retirar."
   ,
   "export_pdf": "Exportar PDF",
+  "share_portfolio": "Compartir Portafolio",
+  "track_your_crypto_portfolio": "Monitorea tu portafolio cripto",
   "market_data_title": "Datos de Mercado",
   "global_crypto_metrics": "Métricas globales de criptomonedas",
   "loading_market_data": "Cargando datos de mercado...",
@@ -160,5 +163,43 @@
   "remove_exchange_message": "¿Eliminar este intercambio y todas sus credenciales API?\n\n{{exchange}}",
   "please_enter_exchange_name": "Por favor ingrese el nombre del intercambio",
   "api_key_required": "La clave API es requerida",
-  "api_secret_required": "El secreto API es requerido"
+  "api_secret_required": "El secreto API es requerido",
+  
+  "futures_positions": "Posiciones de Futuros",
+  "loading_futures_positions": "Cargando posiciones de futuros...",
+  "no_futures_positions": "Sin Posiciones de Futuros",
+  "no_futures_positions_description": "No tienes posiciones de futuros abiertas en tus intercambios conectados.",
+  "exchange_errors": "Errores de Intercambio",
+  "some_exchanges_failed": "Algunos intercambios fallaron al cargar",
+  "size": "Tamaño",
+  "entry_price": "Precio de Entrada",
+  "liquidation_price": "Precio de Liquidación",
+  "leverage": "Apalancamiento",
+  "realized_pnl": "PnL Realizado",
+  "open_date": "Fecha de Apertura",
+  "loading_credentials": "Cargando credenciales para edición...",
+  
+  "long": "LARGO",
+  "short": "CORTO",
+  
+  "news": {
+    "title": "📰 Noticias",
+    "subtitle": "Accede a las principales fuentes de noticias crypto y financieras",
+    "cryptoNews": "Crypto News",
+    "generalEconomy": "Economía General",
+    "tapToAccess": "💡 Toca cualquier tarjeta para acceder a la fuente",
+    "error": "Error",
+    "cannotOpen": "No se pudo abrir {{source}}. Verifica tu conexión a internet.",
+    "failedToOpen": "Error al intentar abrir {{source}}",
+    "ok": "OK"
+  },
+  
+  "tabs": {
+    "portfolio": "Portafolio",
+    "wallets": "Carteras",
+    "market": "Mercado",
+    "tokens": "Tokens",
+    "news": "Noticias",
+    "learn": "Aprender"
+  }
 }

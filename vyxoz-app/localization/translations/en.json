@@ -98,6 +98,7 @@
 
   "learn_learn_more": "Learn more"
   ,
+  "top_assets": "Top Assets",
   "learn_section_bitcoin_title": "Bitcoin",
   "learn_section_bitcoin_p1": "Bitcoin is the first and most well-known cryptocurrency. It introduced the concept of a decentralized digital currency secured by Proof of Work and a global network of miners.",
   "learn_section_bitcoin_p2": "Bitcoin is often used as a store of value; understand its supply cap, on-chain metrics, and the differences between Bitcoin and smart-contract platforms.",
@@ -117,6 +118,8 @@
   "learn_section_investing_p2": "Exchanges let you buy/sell crypto (centralized exchanges - KYC) and you can withdraw to your personal wallet for self custody. P2P marketplaces allow direct trades between users. Always move funds from exchanges to your wallet for long-term storage and verify addresses carefully before withdrawing."
   ,
   "export_pdf": "Export PDF",
+  "share_portfolio": "Share Portfolio",
+  "track_your_crypto_portfolio": "Track your crypto portfolio",
   "market_data_title": "Market Data",
   "global_crypto_metrics": "Global cryptocurrency metrics",
   "loading_market_data": "Loading market data...",
@@ -173,6 +176,30 @@
   "remove_exchange_message": "Remove this exchange and all its API credentials?\n\n{{exchange}}",
   "please_enter_exchange_name": "Please enter an exchange name",
   "api_key_required": "API Key is required",
-  "api_secret_required": "API Secret is required"
+  "api_secret_required": "API Secret is required",
+  
+  "long": "LONG",
+  "short": "SHORT",
+  
+  "news": {
+    "title": "📰 News",
+    "subtitle": "Access the main crypto and financial news sources",
+    "cryptoNews": "Crypto News",
+    "generalEconomy": "General Economy",
+    "tapToAccess": "💡 Tap any card to access the source",
+    "error": "Error",
+    "cannotOpen": "Could not open {{source}}. Check your internet connection.",
+    "failedToOpen": "Error trying to open {{source}}",
+    "ok": "OK"
+  },
+  
+  "tabs": {
+    "portfolio": "Portfolio",
+    "wallets": "Wallets",
+    "market": "Market",
+    "tokens": "Tokens",
+    "news": "News",
+    "learn": "Learn"
+  }
 }
 

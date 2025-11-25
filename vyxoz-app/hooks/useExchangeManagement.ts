@@ -168,14 +168,14 @@ export const useExchangeManagement = () => {
     }
   }, [user, token, fetchExchanges]);
 
-  // Auto-fetch on user change
+  // Auto-fetch on user change - FIXED: removed callback from dependency to prevent loops
   useEffect(() => {
     if (user && token) {
       fetchExchanges();
     } else {
       setExchanges([]);
     }
-  }, [user, token, fetchExchanges]);
+  }, [user, token]); // FIXED: removed fetchExchanges from deps
 
   return {
     exchanges,
