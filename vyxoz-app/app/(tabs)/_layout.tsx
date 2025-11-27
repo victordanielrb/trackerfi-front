@@ -43,13 +43,13 @@ export default function TabLayout() {
       <Tabs.Screen
         name="tokens"
         options={{
-          title: t('tabs.generating-tokens'),
+          title: t('tabs.tokens'),
           // Using a coin/crypto style icon for tokens tab
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="star.fill" color={color} />,
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="bitcoinsign.circle.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="noticias"
+        name="news"
         options={{
           title: t('tabs.news'),
           // Keeping newspaper icon as requested (paper/journal metaphor)
