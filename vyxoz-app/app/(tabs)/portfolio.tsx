@@ -351,23 +351,23 @@ export default function HomeScreen() {
         <View style={styles.actionButtons}>
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={refreshAll}
-          >
-            <Text style={styles.actionButtonText}>🔄 {t('refresh')}</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={styles.actionButton}
             onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>📁 {t('wallets')}</Text>
+            <Text style={styles.actionButtonText}>📁  {'>'} </Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={refreshAll}
+          >
+            <Text style={styles.actionButtonText}>🔄</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.exportButton}
             onPress={exportPortfolioPDF}
           >
-            <Text style={styles.exportButtonText}>📄 {t('export')}</Text>
+            <Text style={styles.exportButtonText}>📄 {'>'}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -495,8 +495,7 @@ const styles = StyleSheet.create({
     padding: 4,
     color: '#666',
     textAlign: 'center',
-  },
-  actionsContainer: {
+  },  actionsContainer: {
     backgroundColor: '#fff',
     margin: 16,
     marginTop: 0,
@@ -512,7 +511,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     margin: 16,
     marginTop: 0,
-    padding: 20,
     borderRadius: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
