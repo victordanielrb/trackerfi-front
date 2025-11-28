@@ -14,8 +14,9 @@ export const API_CONFIG = {
     },
     TRACKING: {
       WALLETS: '/api/tracking/wallets',
-      TOKENS: '/api/tracking/tokens'
-      ,ALERTS: '/api/tracking/alerts'
+      TOKENS: '/api/tracking/tokens',
+      SNAPSHOTS: '/api/tracking/snapshots',
+      ALERTS: '/api/tracking/alerts'
     },
     USERS: {
       BASE: '/api/users',

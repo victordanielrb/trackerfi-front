@@ -70,7 +70,14 @@
   "tokens": "tokens",
   "loading_portfolio": "Carregando portfólio...",
   "no_tokens_found": "Nenhum token encontrado",
-  "track_wallets_to_see_portfolio": "Monitore carteiras para ver seu portfólio"
+  "track_wallets_to_see_portfolio": "Monitore carteiras para ver seu portfólio",
+  "loading_chart": "Carregando gráfico...",
+  "no_chart_data": "Nenhum dado de gráfico disponível",
+  "chart_data_available_after_snapshots": "O histórico do portfólio aparecerá após os snapshots diários",
+  "portfolio_history": "Histórico do Portfólio",
+  "refresh": "Atualizar",
+  "export": "Exportar",
+  "all": "Todos"
   ,
   "learn_title": "Aprender",
   "learn_section_blockchain_title": "Como funciona a blockchain",

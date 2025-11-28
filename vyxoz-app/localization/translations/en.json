@@ -69,7 +69,14 @@
   "tokens": "tokens",
   "loading_portfolio": "Loading portfolio...",
   "no_tokens_found": "No tokens found",
-  "track_wallets_to_see_portfolio": "Track wallets to see your portfolio"
+  "track_wallets_to_see_portfolio": "Track wallets to see your portfolio",
+  "loading_chart": "Loading chart...",
+  "no_chart_data": "No chart data available",
+  "chart_data_available_after_snapshots": "Portfolio history will appear after daily snapshots",
+  "portfolio_history": "Portfolio History",
+  "refresh": "Refresh",
+  "export": "Export",
+  "all": "All"
   ,
   "learn_title": "Learn",
   "learn_section_blockchain_title": "How blockchain works",

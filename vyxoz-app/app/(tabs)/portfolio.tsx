@@ -23,6 +23,7 @@ import { useWalletTracking } from '../../hooks/useWalletTracking';
 import { useFuturesPositions } from '../../hooks/useFuturesPositions';
 import PortfolioTokenDisplay from '../../components/PortfolioTokenDisplay';
 import FuturesPositionsDisplay from '../../components/FuturesPositionsDisplay';
+import PortfolioChart from '../../components/PortfolioChart';
 import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HomeScreen() {
@@ -350,25 +351,31 @@ export default function HomeScreen() {
         <View style={styles.actionButtons}>
           <TouchableOpacity 
             style={styles.actionButton}
-            onPress={() => router.push('/wallets')}
-          >
-            <Text style={styles.actionButtonText}>📁  {'>'} </Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            style={styles.actionButton}
             onPress={refreshAll}
           >
-            <Text style={styles.actionButtonText}>🔄</Text>
+            <Text style={styles.actionButtonText}>🔄 {t('refresh')}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            onPress={() => router.push('/wallets')}
+          >
+            <Text style={styles.actionButtonText}>📁 {t('wallets')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.exportButton}
             onPress={exportPortfolioPDF}
           >
-            <Text style={styles.exportButtonText}>📄 {'>'}</Text>
+            <Text style={styles.exportButtonText}>📄 {t('export')}</Text>
           </TouchableOpacity>
         </View>
+      </View>
+
+      {/* Portfolio Chart */}
+      <View style={styles.chartContainer}>
+        <Text style={styles.sectionTitle}>{t('portfolio_history')}</Text>
+        <PortfolioChart onPress={() => router.push('/wallets')} />
       </View>
 
       {/* Futures Positions */}
@@ -490,6 +497,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   actionsContainer: {
+    backgroundColor: '#fff',
+    margin: 16,
+    marginTop: 0,
+    padding: 20,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  chartContainer: {
     backgroundColor: '#fff',
     margin: 16,
     marginTop: 0,
