@@ -111,6 +111,14 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
   const isPositive = change.value >= 0;
   const lineColor = isPositive ? '#34C759' : '#FF3B30';
   const screenWidth = Dimensions.get('window').width;
+  // Container has 16px padding on each side = 32px total
+  const chartWidth = screenWidth - 32;
+  // Calculate spacing to fit all points within the chart width
+  // The chart content width = initialSpacing + (spacing * (n-1)) + endSpacing
+  // With initialSpacing=8 and endSpacing=8, we have chartWidth - 16 for the line
+  const pointSpacing = chartData.length > 1 
+    ? (chartWidth - 16) / (chartData.length - 1) 
+    : 0;
 
   if (loading) {
     return (
@@ -177,7 +185,7 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
       <View style={styles.chartWrapper}>
         <LineChart
           data={chartData}
-          width={screenWidth - 80}
+          width={chartWidth}
           height={120}
           color={lineColor}
           thickness={2}
@@ -194,9 +202,10 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
           hideYAxisText
           hideAxesAndRules
           yAxisOffset={minValue * 0.95}
-          adjustToWidth
-          initialSpacing={10}
-          endSpacing={10}
+          initialSpacing={8}
+          endSpacing={8}
+          spacing={pointSpacing}
+          disableScroll
           pointerConfig={{
             pointerStripHeight: 100,
             pointerStripColor: 'lightgray',
@@ -315,6 +324,7 @@ const styles = StyleSheet.create({
   chartWrapper: {
     alignItems: 'center',
     marginVertical: 8,
+    overflow: 'hidden',
   },
   dateLabels: {
     flexDirection: 'row',
