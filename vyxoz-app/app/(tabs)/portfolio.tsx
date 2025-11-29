@@ -16,14 +16,16 @@ import {
 import ViewShot from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
+import * as Print from 'expo-print';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
-import { useWalletTracking } from '../../hooks/useWalletTracking';
+import { useWalletTracking, TrackedWalletToken } from '../../hooks/useWalletTracking';
 import { useFuturesPositions } from '../../hooks/useFuturesPositions';
 import PortfolioTokenDisplay from '../../components/PortfolioTokenDisplay';
 import FuturesPositionsDisplay from '../../components/FuturesPositionsDisplay';
 import PortfolioChart from '../../components/PortfolioChart';
+import TransactionHistoryModal from '../../components/TransactionHistoryModal';
 import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HomeScreen() {
@@ -98,15 +100,194 @@ export default function HomeScreen() {
       refetchFutures()
     ]);
   };
-  const exportPortfolioPDF = () => {
-    // TODO: implement PDF export. Placeholder for now.
-    Alert.alert(t('export_pdf'), t('export_pdf') + ' — TODO');
-    // Future implementation: collect visible portfolio data, render to PDF
-    // and trigger share / save flow.
+
+  const generatePortfolioPDFHTML = (
+    totalValue: number,
+    change24h: { abs: number; pct: number },
+    topHoldings: TrackedWalletToken[]
+  ) => {
+    const holdingsRows = topHoldings.map((token, idx) => `
+      <tr>
+        <td>${idx + 1}</td>
+        <td>${token.symbol}</td>
+        <td>${token.name}</td>
+        <td>${Number(token.quantity || 0).toFixed(4)}</td>
+        <td>${currencySymbol}${Number(token.price || 0).toFixed(2)}</td>
+        <td>${currencySymbol}${convertCurrency(Number(token.value || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+        <td style="color: ${(token.price_change_24h || 0) >= 0 ? '#34C759' : '#FF3B30'}">${((token.price_change_24h || 0) * 100).toFixed(2)}%</td>
+      </tr>
+    `).join('');
+
+    const changeSign = change24h.abs >= 0 ? '+' : '';
+
+    return `
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>Portfolio Report - TrackerFi</title>
+          <style>
+            * { box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+              padding: 40px; 
+              color: #333;
+              max-width: 900px;
+              margin: 0 auto;
+            }
+            .header { 
+              text-align: center; 
+              margin-bottom: 40px;
+              padding-bottom: 20px;
+              border-bottom: 2px solid #007AFF;
+            }
+            .logo { font-size: 32px; font-weight: 900; color: #007AFF; margin-bottom: 8px; }
+            .subtitle { color: #666; font-size: 14px; }
+            .date { color: #999; font-size: 12px; margin-top: 8px; }
+            
+            .summary-card {
+              background: linear-gradient(135deg, #007AFF 0%, #00C6FF 100%);
+              border-radius: 16px;
+              padding: 32px;
+              color: white;
+              text-align: center;
+              margin-bottom: 32px;
+            }
+            .total-label { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
+            .total-value { font-size: 42px; font-weight: 800; margin: 12px 0; }
+            .change { font-size: 18px; }
+            .change-value { font-weight: 700; }
+            
+            .stats-row { display: flex; justify-content: center; gap: 40px; margin-top: 20px; }
+            .stat { text-align: center; }
+            .stat-value { font-size: 24px; font-weight: 700; }
+            .stat-label { font-size: 12px; opacity: 0.8; text-transform: uppercase; }
+            
+            .section { margin-bottom: 32px; }
+            .section-title { 
+              font-size: 18px; 
+              font-weight: 700; 
+              color: #333; 
+              margin-bottom: 16px;
+              padding-bottom: 8px;
+              border-bottom: 1px solid #eee;
+            }
+            
+            table { 
+              width: 100%; 
+              border-collapse: collapse; 
+              font-size: 12px;
+            }
+            th { 
+              background-color: #f8f9fa; 
+              color: #333;
+              font-weight: 600;
+              text-align: left;
+              padding: 12px 8px;
+              border-bottom: 2px solid #dee2e6;
+            }
+            td { 
+              padding: 10px 8px; 
+              border-bottom: 1px solid #eee;
+            }
+            tr:hover { background-color: #f8f9fa; }
+            
+            .footer {
+              text-align: center;
+              margin-top: 40px;
+              padding-top: 20px;
+              border-top: 1px solid #eee;
+              color: #999;
+              font-size: 11px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div class="logo">TrackerFi</div>
+            <div class="subtitle">${t('portfolio_report')}</div>
+            <div class="date">${t('generated_on')} ${new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</div>
+          </div>
+
+          <div class="summary-card">
+            <div class="total-label">${t('total_value')}</div>
+            <div class="total-value">${currencySymbol}${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+            <div class="change">
+              <span class="change-value">${changeSign}${currencySymbol}${Math.abs(convertCurrency(change24h.abs)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+              <span>(${changeSign}${(change24h.pct * 100).toFixed(2)}%)</span>
+              <span style="opacity: 0.7; margin-left: 4px;">${t('24h_change')}</span>
+            </div>
+            <div class="stats-row">
+              <div class="stat">
+                <div class="stat-value">${getWalletCount()}</div>
+                <div class="stat-label">${t('tracked_wallets')}</div>
+              </div>
+              <div class="stat">
+                <div class="stat-value">${getTokenCount()}</div>
+                <div class="stat-label">${t('tokens')}</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="section">
+            <div class="section-title">🏆 ${t('top_holdings')}</div>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>${t('symbol')}</th>
+                  <th>${t('name')}</th>
+                  <th>${t('quantity')}</th>
+                  <th>${t('price')}</th>
+                  <th>${t('value')}</th>
+                  <th>${t('24h')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${holdingsRows || `<tr><td colspan="7" style="text-align: center; color: #999;">${t('no_holdings')}</td></tr>`}
+              </tbody>
+            </table>
+          </div>
+
+          <div class="footer">
+            <p>${t('generated_by_trackerfi')}</p>
+            <p>trackerfi.app</p>
+          </div>
+        </body>
+      </html>
+    `;
+  };
+
+  const exportPortfolioPDF = async () => {
+    try {
+      const totalValue = getTotalValue();
+      const change24h = getTotal24hChange();
+      
+      // Get top 10 holdings sorted by value
+      const topHoldings = [...tokens]
+        .sort((a, b) => (Number(b.value) || 0) - (Number(a.value) || 0))
+        .slice(0, 10);
+
+      const html = generatePortfolioPDFHTML(totalValue, change24h, topHoldings);
+      const { uri } = await Print.printToFileAsync({ html });
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { 
+          mimeType: 'application/pdf',
+          dialogTitle: t('share_portfolio_report')
+        });
+      } else {
+        Alert.alert(t('export_pdf'), t('pdf_saved_to') + ': ' + uri);
+      }
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+      Alert.alert(t('error'), t('failed_to_export_pdf'));
+    }
   };
 
   // Share modal state and ref for future capture-to-image
   const [shareVisible, setShareVisible] = useState(false);
+  const [transactionsVisible, setTransactionsVisible] = useState(false);
   const shareRef = useRef<ViewShot | null>(null);
   const [capturedUri, setCapturedUri] = useState<string | null>(null);
 
@@ -353,7 +534,14 @@ export default function HomeScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>📁  {'>'} </Text>
+            <Text style={styles.actionButtonText}>👛</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setTransactionsVisible(true)}
+          >
+            <Text style={styles.actionButtonText}>📋</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -367,10 +555,16 @@ export default function HomeScreen() {
             style={styles.exportButton}
             onPress={exportPortfolioPDF}
           >
-            <Text style={styles.exportButtonText}>📄 {'>'}</Text>
+            <Text style={styles.exportButtonText}>📄</Text>
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* Transaction History Modal */}
+      <TransactionHistoryModal
+        visible={transactionsVisible}
+        onClose={() => setTransactionsVisible(false)}
+      />
 
       {/* Portfolio Chart */}
       <View style={styles.chartContainer}>
@@ -512,6 +706,7 @@ const styles = StyleSheet.create({
     margin: 16,
     marginTop: 0,
     borderRadius: 16,
+    padding: 20,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

@@ -27,6 +27,7 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [timeRange, setTimeRange] = useState<TimeRange>('30d');
+  const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
 
   const currencySymbol = (() => {
     switch (currency) {
@@ -107,8 +108,36 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
     return { value: change, percent };
   };
 
-  const change = getChange();
-  const isPositive = change.value >= 0;
+  // Get display values based on selected point or default (total change)
+  const getDisplayValues = () => {
+    if (selectedPointIndex !== null && chartData.length > 0) {
+      const currentValue = chartData[selectedPointIndex].value;
+      const previousValue = selectedPointIndex > 0 
+        ? chartData[selectedPointIndex - 1].value 
+        : chartData[0].value;
+      const change = currentValue - previousValue;
+      const percent = previousValue !== 0 ? (change / previousValue) * 100 : 0;
+      return { 
+        currentValue, 
+        change, 
+        percent,
+        date: chartData[selectedPointIndex].date,
+        isSelected: true
+      };
+    }
+    // Default: show last value and total change
+    const totalChange = getChange();
+    return {
+      currentValue: chartData.length > 0 ? chartData[chartData.length - 1].value : 0,
+      change: totalChange.value,
+      percent: totalChange.percent,
+      date: chartData.length > 0 ? chartData[chartData.length - 1].date : null,
+      isSelected: false
+    };
+  };
+
+  const displayValues = getDisplayValues();
+  const isPositive = displayValues.change >= 0;
   const lineColor = isPositive ? '#34C759' : '#FF3B30';
   const screenWidth = Dimensions.get('window').width;
   // Container has 16px padding on each side = 32px total
@@ -173,12 +202,22 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
 
       {/* Change Summary */}
       <View style={styles.changeContainer}>
-        <Text style={[styles.changeValue, { color: lineColor }]}>
-          {isPositive ? '+' : ''}{currencySymbol}{Math.abs(change.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+        <Text style={styles.currentValue}>
+          {currencySymbol}{displayValues.currentValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
         </Text>
-        <Text style={[styles.changePercent, { color: lineColor }]}>
-          ({isPositive ? '+' : ''}{change.percent.toFixed(2)}%)
-        </Text>
+        <View style={styles.changeRow}>
+          <Text style={[styles.changeValue, { color: lineColor }]}>
+            {isPositive ? '+' : ''}{currencySymbol}{Math.abs(displayValues.change).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </Text>
+          <Text style={[styles.changePercent, { color: lineColor }]}>
+            ({isPositive ? '+' : ''}{displayValues.percent.toFixed(2)}%)
+          </Text>
+        </View>
+        {displayValues.isSelected && displayValues.date && (
+          <Text style={styles.selectedDate}>
+            {displayValues.date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+          </Text>
+        )}
       </View>
 
       {/* Chart */}
@@ -206,6 +245,16 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
           endSpacing={8}
           spacing={pointSpacing}
           disableScroll
+          focusEnabled
+          showDataPointOnFocus
+          onFocus={(item: any, index: number) => {
+            if (typeof index === 'number' && index >= 0 && index < chartData.length) {
+              setSelectedPointIndex(index);
+            }
+          }}
+          onDataPointClick={(item: any, index: number) => {
+            // Do nothing on click - only drag should update
+          }}
           pointerConfig={{
             pointerStripHeight: 100,
             pointerStripColor: 'lightgray',
@@ -214,8 +263,11 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
             radius: 5,
             pointerLabelWidth: 100,
             pointerLabelHeight: 40,
+            activatePointersOnLongPress: true,
+            autoAdjustPointerLabelPosition: true,
             pointerLabelComponent: (items: any) => {
-              const item = items[0];
+              const item = items?.[0];
+              if (!item) return null;
               return (
                 <View style={styles.pointerLabel}>
                   <Text style={styles.pointerValue}>
@@ -307,19 +359,34 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   changeContainer: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     justifyContent: 'center',
-    alignItems: 'baseline',
+    alignItems: 'center',
     marginBottom: 8,
+    gap: 4,
+  },
+  currentValue: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#333',
+  },
+  changeRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
     gap: 6,
   },
   changeValue: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 14,
+    fontWeight: '600',
   },
   changePercent: {
     fontSize: 14,
     fontWeight: '600',
+  },
+  selectedDate: {
+    fontSize: 12,
+    color: '#999',
+    marginTop: 2,
   },
   chartWrapper: {
     alignItems: 'center',
