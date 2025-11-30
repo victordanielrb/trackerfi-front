@@ -26,7 +26,6 @@ import PortfolioTokenDisplay from '../../components/PortfolioTokenDisplay';
 import FuturesPositionsDisplay from '../../components/FuturesPositionsDisplay';
 import PortfolioChart from '../../components/PortfolioChart';
 import TransactionHistoryModal from '../../components/TransactionHistoryModal';
-import AlertNotificationBell from '../../components/AlertNotificationBell';
 import { useSettings } from '../../contexts/SettingsContext';
 
 export default function HomeScreen() {
@@ -390,7 +389,6 @@ export default function HomeScreen() {
           <Text style={styles.usernameText}>{user?.username || t('user')}</Text>
         </View>
         <View style={styles.headerButtons}>
-          <AlertNotificationBell />
           <TouchableOpacity style={styles.shareButton} onPress={() => setShareVisible(true)}>
             <Text style={styles.shareButtonText}>📤</Text>
           </TouchableOpacity>

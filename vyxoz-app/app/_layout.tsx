@@ -4,8 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import '../localization/i18n';
 import { SettingsProvider } from '../contexts/SettingsContext';
-import { AlertNotificationProvider } from '../contexts/AlertNotificationContext';
 import LanguageCurrencySelector from '../components/LanguageCurrencySelector';
+import PushNotificationInitializer from '../components/PushNotificationInitializer';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -21,7 +21,7 @@ export default function RootLayout() {
 
   return (
     <AuthProvider>
-      <AlertNotificationProvider>
+      <PushNotificationInitializer>
         <ThemeProvider value={colorScheme == 'dark' ? DefaultTheme : DarkTheme}>
           <SettingsProvider>
             {/* Global Settings (language + currency) Selector */}
@@ -36,7 +36,7 @@ export default function RootLayout() {
             <StatusBar style="auto" />
           </SettingsProvider>
         </ThemeProvider>
-      </AlertNotificationProvider>
+      </PushNotificationInitializer>
     </AuthProvider>
   );
 }

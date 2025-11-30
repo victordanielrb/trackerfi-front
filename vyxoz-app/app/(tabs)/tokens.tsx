@@ -96,6 +96,10 @@ export default function TokensScreen() {
   const [tradingData, setTradingData] = useState<TokenTradingData | null>(null);
   const [chartModalVisible, setChartModalVisible] = useState(false);
   const [chartLoading, setChartLoading] = useState(false);
+  
+  // Alert creation state
+  const [isCreatingAlert, setIsCreatingAlert] = useState(false);
+  const [alertsModalVisible, setAlertsModalVisible] = useState(false);
 
   useEffect(() => {
     fetchFavorites();
@@ -210,13 +214,13 @@ export default function TokensScreen() {
       const url = getApiUrl('/api/tracking/alerts');
       const res = await axios.get(url, { headers: { Authorization: `Bearer ${token}` } });
       setAlerts(res.data.alerts || []);
-    } catch (e) {
-      console.warn('Failed to load alerts', e);
+    } catch (e: any) {
+      console.warn('Failed to load alerts:', e.message);
     }
   };
 
   const createAlert = async () => {
-    if (!newAlertToken || !newAlertThreshold) {
+    if (!selectedToken || !newAlertThreshold) {
       Alert.alert('Erro', 'Token e limite são obrigatórios');
       return;
     }
@@ -224,17 +228,32 @@ export default function TokensScreen() {
     try {
       const url = getApiUrl('/api/tracking/alerts');
       const payload = {
-        token: { symbol: newAlertToken },
+        token_id: selectedToken.id,
+        token_symbol: selectedToken.symbol,
+        token_name: selectedToken.name,
         price_threshold: Number(newAlertThreshold),
         alert_type: newAlertType
       };
       await axios.post(url, payload, { headers: { Authorization: `Bearer ${token}` } });
       setNewAlertToken('');
       setNewAlertThreshold('');
+      setIsCreatingAlert(false);
+      Alert.alert('Sucesso', 'Alerta criado!');
       fetchAlerts();
     } catch (e) {
       console.warn('Failed to create alert', e);
       Alert.alert('Erro', 'Não foi possível criar alerta');
+    }
+  };
+
+  const deleteAlert = async (index: number) => {
+    try {
+      const url = getApiUrl(`/api/tracking/alerts/${index}`);
+      await axios.delete(url, { headers: { Authorization: `Bearer ${token}` } });
+      fetchAlerts();
+    } catch (e) {
+      console.warn('Failed to delete alert', e);
+      Alert.alert('Erro', 'Não foi possível remover o alerta');
     }
   };
 
@@ -279,7 +298,18 @@ export default function TokensScreen() {
         </ScrollView>
       )}
 
-      <Text style={styles.title}>Tokens - Favoritos</Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.title}>Tokens - Favoritos</Text>
+        <TouchableOpacity 
+          style={styles.alertsHeaderBtn}
+          onPress={async () => {
+            await fetchAlerts(); // Refresh alerts before opening modal
+            setAlertsModalVisible(true);
+          }}
+        >
+          <Text style={styles.alertsHeaderBtnText}>🔔 Alertas</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
         scrollEnabled={false}
         data={favorites}
@@ -305,34 +335,6 @@ export default function TokensScreen() {
           </TouchableOpacity>
         )}
       />
-
-      <View style={styles.section}>
-        <Text style={styles.title}>Alertas</Text>
-        <FlatList
-          data={alerts}
-          keyExtractor={(a, i) => String(i)}
-          renderItem={({ item }) => (
-            <View style={styles.alertRow}>
-              <Text>{item.token?.symbol || item.token?.address} - {item.alert_type} {item.price_threshold}</Text>
-              <Text style={styles.small}>{item.last_triggered ? `Triggered: ${item.last_triggered}` : ''}</Text>
-            </View>
-          )}
-        />
-
-        <View style={styles.formRow}>
-          <TextInput placeholder="Token symbol/address" value={newAlertToken} onChangeText={setNewAlertToken} style={styles.input} />
-          <TextInput placeholder="Price threshold" value={newAlertThreshold} onChangeText={setNewAlertThreshold} style={styles.input} keyboardType="numeric" />
-        </View>
-        <View style={styles.formRow}> 
-          <TouchableOpacity style={[styles.btn, newAlertType === 'price_above' ? styles.btnPrimary : styles.btnOutline]} onPress={() => setNewAlertType('price_above')}>
-            <Text style={styles.btnText}>Acima</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.btn, newAlertType === 'price_below' ? styles.btnPrimary : styles.btnOutline]} onPress={() => setNewAlertType('price_below')}>
-            <Text style={styles.btnText}>Abaixo</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.btnCreate} onPress={createAlert}><Text style={styles.btnText}>Criar</Text></TouchableOpacity>
-        </View>
-      </View>
 
       {/* Token Detail Modal */}
       <Modal visible={detailModalVisible} animationType="slide" transparent>
@@ -387,8 +389,88 @@ export default function TokensScreen() {
                 >
                   <Text style={styles.favoriteBtnText}>Adicionar aos Favoritos</Text>
                 </TouchableOpacity>
+
+                {/* New Alert Section */}
+                <View style={styles.modalAlertSection}>
+                  <TouchableOpacity 
+                    style={styles.createAlertBtn}
+                    onPress={() => setIsCreatingAlert(!isCreatingAlert)}
+                  >
+                    <Text style={styles.createAlertBtnText}>
+                      {isCreatingAlert ? 'Cancelar Alerta' : 'Criar Alerta de Preço'}
+                    </Text>
+                  </TouchableOpacity>
+                  
+                  {isCreatingAlert && (
+                    <View style={styles.alertForm}>
+                      <Text style={styles.alertFormLabel}>Me avise quando o preço for:</Text>
+                      <View style={styles.alertTypeContainer}>
+                        <TouchableOpacity 
+                          style={[styles.typeBtn, newAlertType === 'price_above' ? styles.typeBtnActive : null]} 
+                          onPress={() => setNewAlertType('price_above')}
+                        >
+                          <Text style={[styles.typeBtnText, newAlertType === 'price_above' ? styles.typeBtnTextActive : null]}>Acima de</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity 
+                          style={[styles.typeBtn, newAlertType === 'price_below' ? styles.typeBtnActive : null]} 
+                          onPress={() => setNewAlertType('price_below')}
+                        >
+                          <Text style={[styles.typeBtnText, newAlertType === 'price_below' ? styles.typeBtnTextActive : null]}>Abaixo de</Text>
+                        </TouchableOpacity>
+                      </View>
+                      
+                      <TextInput 
+                        placeholder="Preço alvo (USD)" 
+                        value={newAlertThreshold} 
+                        onChangeText={setNewAlertThreshold} 
+                        style={styles.alertInput} 
+                        keyboardType="numeric" 
+                      />
+                      
+                      <TouchableOpacity style={styles.saveAlertBtn} onPress={createAlert}>
+                        <Text style={styles.saveAlertBtnText}>Salvar Alerta</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                </View>
               </ScrollView>
             ) : null}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Alerts List Modal */}
+      <Modal visible={alertsModalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { minHeight: 300 }]}>
+            <ScrollView style={{ padding: 20 }}>
+              <TouchableOpacity style={styles.closeBtn} onPress={() => setAlertsModalVisible(false)}>
+                <Text style={styles.closeBtnText}>✕</Text>
+              </TouchableOpacity>
+              <Text style={styles.modalTitle}>Meus Alertas</Text>
+              
+              {alerts.length === 0 ? (
+                <Text style={styles.emptyText}>Nenhum alerta configurado.</Text>
+              ) : (
+                alerts.map((item, index) => (
+                  <View key={index} style={styles.alertRow}>
+                    <View style={{flex: 1}}>
+                      <Text style={styles.alertToken}>{item.token_symbol || item.token?.symbol || 'Unknown'}</Text>
+                      <Text style={styles.alertDetail}>
+                        {item.alert_type === 'price_above' ? 'Acima de' : 'Abaixo de'} ${item.price_threshold ?? 'N/A'}
+                      </Text>
+                      {item.last_triggered ? (
+                        <Text style={styles.small}>Disparado: {new Date(item.last_triggered).toLocaleString()}</Text>
+                      ) : null}
+                      <Text style={styles.small}>Disparos: {item.triggered_count || 0}</Text>
+                    </View>
+                    <TouchableOpacity onPress={() => deleteAlert(index)} style={styles.removeBtn}>
+                      <Text style={styles.removeBtnText}>Remover</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -412,6 +494,24 @@ export default function TokensScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
   title: { fontSize: 18, fontWeight: '700', marginBottom: 8, marginTop: 16 },
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  alertsHeaderBtn: {
+    backgroundColor: '#007AFF',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  alertsHeaderBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 14,
+  },
   tokenRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: '#fff' },
   favoriteTokenRow: { 
     flexDirection: 'row', 
@@ -432,7 +532,7 @@ const styles = StyleSheet.create({
   tokenText: { fontSize: 16 },
   tokenSub: { color: '#666' },
   section: { marginTop: 24 },
-  alertRow: { paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f2f2f2', backgroundColor: '#fff' },
+  alertRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f2f2f2', backgroundColor: '#fff' },
   small: { color: '#999', fontSize: 12 },
   formRow: { flexDirection: 'row', marginTop: 12, alignItems: 'center' },
   input: { flex: 1, borderWidth: 1, borderColor: '#ddd', padding: 8, borderRadius: 8, marginRight: 8, backgroundColor: '#fff' },
@@ -576,5 +676,87 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-  }
+  },
+  
+  // Alert styles
+  alertToken: { fontSize: 16, fontWeight: '700', color: '#333' },
+  alertDetail: { fontSize: 14, color: '#666', marginTop: 2 },
+  emptyText: { textAlign: 'center', color: '#999', marginTop: 16, fontStyle: 'italic' },
+  
+  // Modal Alert Section
+  modalAlertSection: {
+    marginTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingTop: 16,
+  },
+  createAlertBtn: {
+    backgroundColor: '#f0f9ff',
+    padding: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#007AFF',
+  },
+  createAlertBtnText: {
+    color: '#007AFF',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  alertForm: {
+    marginTop: 16,
+    backgroundColor: '#f9f9f9',
+    padding: 16,
+    borderRadius: 12,
+  },
+  alertFormLabel: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 12,
+  },
+  alertTypeContainer: {
+    flexDirection: 'row',
+    marginBottom: 12,
+    gap: 8,
+  },
+  typeBtn: {
+    flex: 1,
+    padding: 10,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+  },
+  typeBtnActive: {
+    backgroundColor: '#007AFF',
+    borderColor: '#007AFF',
+  },
+  typeBtnText: {
+    color: '#666',
+    fontWeight: '600',
+  },
+  typeBtnTextActive: {
+    color: '#fff',
+  },
+  alertInput: {
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    marginBottom: 12,
+  },
+  saveAlertBtn: {
+    backgroundColor: '#007AFF',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  saveAlertBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 16,
+  },
 });
