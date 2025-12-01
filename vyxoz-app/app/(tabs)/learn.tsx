@@ -1,12 +1,9 @@
 import React from 'react';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { AppTheme, CommonStyles } from '@/constants/theme';
 
 export default function LearnScreen() {
-  const colorScheme = useColorScheme();
-  const theme = Colors[colorScheme ?? 'light'];
   const { t } = useTranslation();
 
   const open = async (url: string) => {
@@ -18,13 +15,19 @@ export default function LearnScreen() {
   };
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}
-      contentContainerStyle={styles.content}
-    >
-  <Text style={[styles.title, { color: theme.text }]}>{t('learn_title')}</Text>
+    <View style={styles.safeContainer}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{t('learn_title')}</Text>
+        <Text style={styles.headerSubtitle}>{t('learn_subtitle')}</Text>
+      </View>
+      
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.content}
+      >
 
       {/* Reordered sections: Blockchain -> Bitcoin -> Self-custody -> Wallets -> DeFi & Ethereum -> How to Invest */}
-      <Section title={t('learn_section_blockchain_title')} theme={theme}>
+      <Section title={t('learn_section_blockchain_title')}>
         <Text style={styles.paragraph}>{t('learn_section_blockchain_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_blockchain_p2')}</Text>
         <View style={styles.linksRow}>
@@ -40,7 +43,7 @@ export default function LearnScreen() {
         </View>
       </Section>
 
-      <Section title={t('learn_section_bitcoin_title')} theme={theme}>
+      <Section title={t('learn_section_bitcoin_title')}>
         <Text style={styles.paragraph}>{t('learn_section_bitcoin_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_bitcoin_p2')}</Text>
         <View style={styles.linksRow}>
@@ -56,7 +59,7 @@ export default function LearnScreen() {
         </View>
       </Section>
 
-      <Section title={t('learn_section_custody_title')} theme={theme}>
+      <Section title={t('learn_section_custody_title')}>
         <Text style={styles.paragraph}>{t('learn_section_custody_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_custody_diff')}</Text>
         <Text style={styles.subheading}>{t('learn_section_custody_bluewallet_title')}</Text>
@@ -66,7 +69,7 @@ export default function LearnScreen() {
         <Text style={styles.paragraph}>{t('learn_section_custody_p2')}</Text>
       </Section>
 
-      <Section title={t('learn_section_wallets_title')} theme={theme}>
+      <Section title={t('learn_section_wallets_title')}>
         <Text style={styles.paragraph}>{t('learn_section_wallets_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_wallets_p2')}</Text>
         <View style={styles.linksRow}>
@@ -82,7 +85,7 @@ export default function LearnScreen() {
         </View>
       </Section>
 
-      <Section title={t('learn_section_defi_title')} theme={theme}>
+      <Section title={t('learn_section_defi_title')}>
         <Text style={styles.paragraph}>{t('learn_section_defi_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_defi_p2')}</Text>
         <View style={styles.linksRow}>
@@ -98,7 +101,7 @@ export default function LearnScreen() {
         </View>
       </Section>
 
-      <Section title={t('learn_section_investing_title')} theme={theme}>
+      <Section title={t('learn_section_investing_title')}>
         <Text style={styles.paragraph}>{t('learn_section_investing_p1')}</Text>
         <Text style={styles.paragraph}>{t('learn_section_investing_p2')}</Text>
         <Text style={styles.bullet}>• {t('learn_bullet_dyor')}</Text>
@@ -107,11 +110,12 @@ export default function LearnScreen() {
       </Section>
 
       <View style={{ height: 40 }} />
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
-function Section({ title, children, theme }: { title: string; children: React.ReactNode; theme: any }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
@@ -130,43 +134,58 @@ function LearnMore({ onPress }: { onPress: () => void }) {
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: AppTheme.colors.background,
+  },
+  header: {
+    backgroundColor: AppTheme.colors.card,
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingTop: 60,
+    paddingBottom: AppTheme.spacing.lg,
+  },
+  headerTitle: {
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  headerSubtitle: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+  },
   container: {
     flex: 1,
+    backgroundColor: AppTheme.colors.background,
   },
   content: {
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   title: {
-    fontSize: 28,
-    fontWeight: '700',
-    marginBottom: 12,
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.md,
   },
   section: {
-    marginBottom: 20,
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.lg,
+    padding: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 8,
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   sectionBody: {},
   paragraph: {
-    fontSize: 14,
-    color: '#444',
-    lineHeight: 20,
-    marginBottom: 8,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+    marginBottom: AppTheme.spacing.sm,
   },
   bullet: {
-    fontSize: 14,
-    color: '#444',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     marginLeft: 6,
     marginBottom: 6,
   },
@@ -174,27 +193,28 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   linkText: {
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     fontWeight: '600',
   },
   linksRow: {
     flexDirection: 'row',
-    gap: 8,
-    marginTop: 8,
+    gap: AppTheme.spacing.sm,
+    marginTop: AppTheme.spacing.sm,
   },
   linkChip: {
     paddingVertical: 6,
     paddingHorizontal: 10,
-    backgroundColor: '#f0f6ff',
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primaryLight,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   linkChipText: {
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     fontWeight: '600',
   },
   subheading: {
-    marginTop: 8,
+    marginTop: AppTheme.spacing.sm,
     fontSize: 15,
     fontWeight: '700',
+    color: AppTheme.colors.textDark,
   },
 });

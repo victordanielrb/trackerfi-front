@@ -11,7 +11,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
+import { AppTheme } from '@/constants/theme';
 
 interface AddExchangeFormProps {
   onAddExchange: (name: string, apiKey: string, apiSecret: string) => Promise<void>;
@@ -110,9 +112,10 @@ export default function AddExchangeForm({ onAddExchange, onCancel }: AddExchange
           </View>
 
           <View style={styles.securityNote}>
-            <Text style={styles.securityNoteText}>
-              🔒 {t('exchange_security_note')}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="lock-closed" size={14} color="#666" />
+              <Text style={styles.securityNoteText}>{t('exchange_security_note')}</Text>
+            </View>
           </View>
 
           {error && (
@@ -239,30 +242,30 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: AppTheme.borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
+    borderColor: AppTheme.colors.border,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   cancelButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
-    color: '#666',
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
   },
   submitButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#007AFF',
+    borderRadius: AppTheme.borderRadius.sm,
+    backgroundColor: AppTheme.colors.primary,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
   submitButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
-    color: '#fff',
+    color: AppTheme.colors.card,
     textAlign: 'center',
   },
 });

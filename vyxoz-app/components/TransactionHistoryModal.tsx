@@ -14,8 +14,10 @@ import {
 } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import * as Clipboard from 'expo-clipboard';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTransactions, TransactionWithMeta, Transaction } from '../hooks/useTransactions';
 import { useWalletTracking, TrackedWallet } from '../hooks/useWalletTracking';
+import { AppTheme } from '@/constants/theme';
 
 interface TransactionHistoryModalProps {
   visible: boolean;
@@ -135,41 +137,42 @@ export const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = (
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getTransactionIcon = (type: string) => {
+  const getTransactionIcon = (type: string): React.ReactNode => {
+    const iconSize = 16;
+    const iconColor = '#6B7280';
     switch (type) {
       case 'send':
-        return '↑';
+        return <Ionicons name="arrow-up" size={iconSize} color="#FF3B30" />;
       case 'receive':
-        return '↓';
+        return <Ionicons name="arrow-down" size={iconSize} color="#34C759" />;
       case 'trade':
-        return '↔️';
+        return <Ionicons name="swap-horizontal" size={iconSize} color={iconColor} />;
       case 'approve':
-        return '✓';
+        return <Ionicons name="checkmark" size={iconSize} color={iconColor} />;
       case 'bid':
-        return '🏷️';
+        return <Ionicons name="pricetag" size={iconSize} color={iconColor} />;
       case 'burn':
-        return '🔥';
+        return <Ionicons name="flame" size={iconSize} color="#FF6B35" />;
       case 'claim':
-        return '🎁';
+        return <Ionicons name="gift" size={iconSize} color={iconColor} />;
       case 'delegate':
-        return '👥';
+        return <Ionicons name="people" size={iconSize} color={iconColor} />;
       case 'deploy':
-        return '📦';
+        return <Ionicons name="cube" size={iconSize} color={iconColor} />;
       case 'deposit':
-        return '📥';
+        return <Ionicons name="download" size={iconSize} color="#34C759" />;
       case 'execute':
-        return '⚡';
+        return <Ionicons name="flash" size={iconSize} color="#FFB800" />;
       case 'mint':
-        return '🪙';
+        return <MaterialCommunityIcons name="circle-multiple" size={iconSize} color="#FFB800" />;
       case 'revoke':
-        return '⛔';
+        return <Ionicons name="close-circle" size={iconSize} color="#FF3B30" />;
       case 'revoke_delegation':
-        return '🔒';
+        return <Ionicons name="lock-closed" size={iconSize} color={iconColor} />;
       case 'withdraw':
-        return '📤';
-      // Avoid duplicates in case labels; these are handled above
+        return <Ionicons name="arrow-up-circle" size={iconSize} color="#FF3B30" />;
       default:
-        return '•';
+        return <Ionicons name="ellipse" size={8} color={iconColor} />;
     }
   };
 
@@ -569,7 +572,7 @@ export const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = (
                 </View>
               ) : (
                 <View style={styles.emptyContainer}>
-                  <Text style={styles.emptyIcon}>📋</Text>
+                  <Ionicons name="receipt-outline" size={48} color="#6B7280" />
                   <Text style={styles.emptyTitle}>{t('no_transactions')}</Text>
                   <Text style={styles.emptySubtitle}>{t('no_transactions_description')}</Text>
                 </View>
@@ -585,139 +588,134 @@ export const TransactionHistoryModal: React.FC<TransactionHistoryModalProps> = (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingTop: 16,
-    paddingBottom: 12,
-    backgroundColor: '#fff',
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingTop: AppTheme.spacing.md,
+    paddingBottom: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
   },
   closeButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#f0f0f0',
+    backgroundColor: AppTheme.colors.cardInner,
     alignItems: 'center',
     justifyContent: 'center',
   },
   closeText: {
     fontSize: 18,
-    color: '#333',
+    color: AppTheme.colors.textDark,
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
   },
   filterToggle: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 12,
-    backgroundColor: '#fff',
+    paddingVertical: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
   },
   filterToggleText: {
-    fontSize: 14,
-    color: '#007AFF',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.primary,
     fontWeight: '600',
   },
   filterBadge: {
-    marginLeft: 8,
-    backgroundColor: '#007AFF',
+    marginLeft: AppTheme.spacing.sm,
+    backgroundColor: AppTheme.colors.primary,
     borderRadius: 10,
-    paddingHorizontal: 8,
+    paddingHorizontal: AppTheme.spacing.sm,
     paddingVertical: 2,
   },
   filterBadgeText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: 'bold',
   },
   filtersContainer: {
-    backgroundColor: '#fff',
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    backgroundColor: AppTheme.colors.card,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingBottom: AppTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
   },
   filterRow: {
-    marginTop: 12,
+    marginTop: AppTheme.spacing.md,
   },
   filterLabel: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontWeight: '600',
-    color: '#333',
-    marginBottom: 8,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   filterChips: {
     flexDirection: 'row',
   },
   chip: {
     paddingHorizontal: 14,
-    paddingVertical: 8,
-    backgroundColor: '#f0f0f0',
+    paddingVertical: AppTheme.spacing.sm,
+    backgroundColor: AppTheme.colors.cardInner,
     borderRadius: 20,
-    marginRight: 8,
+    marginRight: AppTheme.spacing.sm,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: AppTheme.colors.border,
   },
   chipActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
+    borderColor: AppTheme.colors.primary,
   },
   chipText: {
-    fontSize: 13,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     fontWeight: '500',
   },
   chipTextActive: {
-    color: '#fff',
+    color: AppTheme.colors.card,
   },
   clearButton: {
-    marginTop: 12,
+    marginTop: AppTheme.spacing.md,
     paddingVertical: 10,
     backgroundColor: '#ff3b3020',
-    borderRadius: 8,
+    borderRadius: AppTheme.borderRadius.sm,
     alignItems: 'center',
   },
   clearButtonText: {
-    color: '#ff3b30',
+    color: AppTheme.colors.danger,
     fontWeight: '600',
   },
   countContainer: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: '#f5f5f5',
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    backgroundColor: AppTheme.colors.background,
   },
   countText: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: AppTheme.spacing.md,
     paddingBottom: 40,
   },
   transactionItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginTop: AppTheme.spacing.sm,
+    ...AppTheme.shadows.card,
   },
   txLeft: {
     flexDirection: 'row',
@@ -735,29 +733,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   txInfo: {
-    marginLeft: 12,
+    marginLeft: AppTheme.spacing.md,
     flex: 1,
   },
   txType: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: 'bold',
-    color: '#000',
+    color: AppTheme.colors.textDark,
     textTransform: 'capitalize',
   },
   txSubtitle: {
-    fontSize: 12,
+    ...AppTheme.typography.small,
     fontWeight: '500',
-    color: '#666',
+    color: AppTheme.colors.textMuted,
     marginTop: 2,
   },
   txDate: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     marginTop: 2,
   },
   txWallet: {
     fontSize: 11,
-    color: '#999',
+    color: AppTheme.colors.textLight,
     marginTop: 2,
   },
   txRight: {
@@ -771,55 +769,55 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     borderRadius: 8,
-    marginRight: 4,
+    marginRight: AppTheme.spacing.xs,
   },
   txAmount: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontWeight: '600',
   },
   txValue: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     marginTop: 2,
   },
   txTypeLabel: {
     fontSize: 11,
-    color: '#666',
+    color: AppTheme.colors.textMuted,
     marginTop: 2,
   },
   copyButton: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    backgroundColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
     borderRadius: 6,
   },
   copyButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
   detailActionButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    backgroundColor: '#007AFF',
+    paddingVertical: AppTheme.spacing.md,
+    paddingHorizontal: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
+    backgroundColor: AppTheme.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 6,
   },
   detailActionText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
   chainBadge: {
-    marginTop: 4,
+    marginTop: AppTheme.spacing.xs,
     paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 4,
+    borderRadius: AppTheme.borderRadius.xs,
   },
   chainText: {
     fontSize: 10,
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
     textTransform: 'capitalize',
   },
@@ -830,9 +828,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   loadingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: '#666',
+    marginTop: AppTheme.spacing.md,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   emptyContainer: {
     flex: 1,
@@ -843,17 +841,16 @@ const styles = StyleSheet.create({
   },
   emptyIcon: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: AppTheme.spacing.md,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
   },
   errorContainer: {
@@ -863,27 +860,27 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   errorText: {
-    fontSize: 14,
-    color: '#ff3b30',
-    marginBottom: 16,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.danger,
+    marginBottom: AppTheme.spacing.md,
   },
   retryButton: {
-    paddingHorizontal: 24,
+    paddingHorizontal: AppTheme.spacing.xl,
     paddingVertical: 10,
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   retryText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
   // New styles for details modal
   detailHeader: {
     alignItems: 'center',
-    marginBottom: 24,
-    paddingBottom: 24,
+    marginBottom: AppTheme.spacing.xl,
+    paddingBottom: AppTheme.spacing.xl,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
   },
   detailIconContainer: {
     width: 64,
@@ -891,84 +888,83 @@ const styles = StyleSheet.create({
     borderRadius: 32,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   detailIcon: {
     fontSize: 32,
   },
   detailType: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
   },
   detailDate: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+    marginBottom: AppTheme.spacing.md,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
   },
   statusText: {
-    fontSize: 12,
+    ...AppTheme.typography.small,
     fontWeight: 'bold',
   },
   detailSection: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: AppTheme.spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#f5f5f5',
+    borderBottomColor: AppTheme.colors.cardInner,
   },
   detailLabel: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     flex: 1,
   },
   detailValue: {
-    fontSize: 14,
-    color: '#333',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textDark,
     fontWeight: '500',
     flex: 2,
     textAlign: 'right',
   },
   sectionTitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 12,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.md,
   },
   transferCard: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
     borderWidth: 1,
-    borderColor: '#eee',
+    borderColor: AppTheme.colors.border,
   },
   transferHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
   },
   transferSymbol: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.colors.textDark,
   },
   transferAmount: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
   },
   transferDetails: {
@@ -976,24 +972,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   transferDetailText: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
   },
   emptyText: {
     textAlign: 'center',
-    color: '#999',
+    color: AppTheme.colors.textLight,
     fontStyle: 'italic',
-    marginTop: 12,
+    marginTop: AppTheme.spacing.md,
   },
   copyButtonSmall: {
-    backgroundColor: '#f0f0f0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    backgroundColor: AppTheme.colors.cardInner,
+    paddingHorizontal: AppTheme.spacing.sm,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.xs,
   },
   copyButtonTextSmall: {
     fontSize: 10,
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     fontWeight: '600',
   },
 });

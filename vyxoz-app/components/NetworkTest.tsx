@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import axios from 'axios';
 
 const NetworkTest = () => {
   const [testing, setTesting] = useState(false);
-  const [results, setResults] = useState<string[]>([]);
+  const [results, setResults] = useState<{success: boolean; message: string}[]>([]);
 
   const testEndpoints = [
     'http://localhost:3000/health',
@@ -16,21 +17,21 @@ const NetworkTest = () => {
   const runTests = async () => {
     setTesting(true);
     setResults([]);
-    const newResults: string[] = [];
+    const newResults: {success: boolean; message: string}[] = [];
 
     for (const endpoint of testEndpoints) {
       try {
         const response = await axios.get(endpoint, { timeout: 5000 });
-        newResults.push(`✅ ${endpoint}: ${response.status} - ${JSON.stringify(response.data).substring(0, 50)}`);
+        newResults.push({success: true, message: `${endpoint}: ${response.status} - ${JSON.stringify(response.data).substring(0, 50)}`});
       } catch (error: any) {
         if (error.code === 'ECONNREFUSED') {
-          newResults.push(`❌ ${endpoint}: Connection refused - Backend not running`);
+          newResults.push({success: false, message: `${endpoint}: Connection refused - Backend not running`});
         } else if (error.code === 'ENOTFOUND') {
-          newResults.push(`❌ ${endpoint}: Host not found`);
+          newResults.push({success: false, message: `${endpoint}: Host not found`});
         } else if (error.code === 'ETIMEDOUT') {
-          newResults.push(`❌ ${endpoint}: Timeout`);
+          newResults.push({success: false, message: `${endpoint}: Timeout`});
         } else {
-          newResults.push(`❌ ${endpoint}: ${error.message}`);
+          newResults.push({success: false, message: `${endpoint}: ${error.message}`});
         }
       }
     }
@@ -55,16 +56,22 @@ const NetworkTest = () => {
 
       <View style={styles.results}>
         {results.map((result, index) => (
-          <Text key={index} style={styles.resultText}>
-            {result}
-          </Text>
+          <View key={index} style={{ flexDirection: 'row', alignItems: 'flex-start', gap: 6, marginBottom: 4 }}>
+            <Ionicons name={result.success ? 'checkmark-circle' : 'close-circle'} size={16} color={result.success ? '#34C759' : '#FF3B30'} />
+            <Text style={[styles.resultText, { flex: 1 }]}>
+              {result.message}
+            </Text>
+          </View>
         ))}
       </View>
 
       {results.length > 0 && (
-        <Text style={styles.info}>
-          💡 If all tests fail, make sure your backend is running on localhost:3000
-        </Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Ionicons name="bulb-outline" size={16} color="#666" />
+          <Text style={styles.info}>
+            If all tests fail, make sure your backend is running on localhost:3000
+          </Text>
+        </View>
       )}
     </View>
   );

@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator, TouchableOpacity, Dimensions } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
 import { useSettings } from '../contexts/SettingsContext';
 import { API_CONFIG, getApiUrl } from '../constants/api';
+import { AppTheme } from '@/constants/theme';
 
 interface Snapshot {
   _id: string;
@@ -138,7 +140,7 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
 
   const displayValues = getDisplayValues();
   const isPositive = displayValues.change >= 0;
-  const lineColor = isPositive ? '#34C759' : '#FF3B30';
+  const lineColor = isPositive ? AppTheme.colors.success : AppTheme.colors.danger;
   const screenWidth = Dimensions.get('window').width;
   // Container has 16px padding on each side = 32px total
   const chartWidth = screenWidth - 32;
@@ -153,7 +155,7 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
     return (
       <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="small" color="#007AFF" />
+          <ActivityIndicator size="small" color={AppTheme.colors.primary} />
           <Text style={styles.loadingText}>{t('loading_chart')}</Text>
         </View>
       </TouchableOpacity>
@@ -164,7 +166,7 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
     return (
       <TouchableOpacity style={styles.container} onPress={onPress} activeOpacity={0.8}>
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyIcon}>📊</Text>
+          <Ionicons name="bar-chart-outline" size={48} color={AppTheme.colors.textMuted} style={{ marginBottom: 12 }} />
           <Text style={styles.emptyText}>
             {error || t('no_chart_data')}
           </Text>
@@ -299,10 +301,11 @@ export default function PortfolioChart({ onPress }: PortfolioChartProps) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 8,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.sm,
+    ...AppTheme.shadows.card,
   },
   loadingContainer: {
     height: 180,
@@ -310,65 +313,64 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    marginTop: 8,
-    color: '#666',
-    fontSize: 14,
+    marginTop: AppTheme.spacing.sm,
+    color: AppTheme.colors.textMuted,
+    ...AppTheme.typography.body,
   },
   emptyContainer: {
     height: 180,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   emptyIcon: {
     fontSize: 32,
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
   },
   emptyText: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 12,
-    color: '#999',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textLight,
     textAlign: 'center',
-    marginTop: 4,
+    marginTop: AppTheme.spacing.xs,
   },
   timeRangeContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 12,
-    gap: 8,
+    marginBottom: AppTheme.spacing.md,
+    gap: AppTheme.spacing.sm,
   },
   timeRangeButton: {
-    paddingHorizontal: 12,
+    paddingHorizontal: AppTheme.spacing.md,
     paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#f0f0f0',
+    borderRadius: AppTheme.borderRadius.lg,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   timeRangeButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
   },
   timeRangeText: {
-    fontSize: 12,
+    ...AppTheme.typography.small,
     fontWeight: '600',
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   timeRangeTextActive: {
-    color: '#fff',
+    color: AppTheme.colors.card,
   },
   changeContainer: {
     flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 8,
-    gap: 4,
+    marginBottom: AppTheme.spacing.sm,
+    gap: AppTheme.spacing.xs,
   },
   currentValue: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#333',
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
   },
   changeRow: {
     flexDirection: 'row',
@@ -376,42 +378,43 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   changeValue: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontWeight: '600',
   },
   changePercent: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontWeight: '600',
   },
   selectedDate: {
-    fontSize: 12,
-    color: '#999',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textLight,
     marginTop: 2,
   },
   chartWrapper: {
     alignItems: 'center',
-    marginVertical: 8,
+    marginVertical: AppTheme.spacing.sm,
     overflow: 'hidden',
   },
   dateLabels: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
-    marginTop: 4,
+    paddingHorizontal: AppTheme.spacing.sm,
+    marginTop: AppTheme.spacing.xs,
   },
   dateLabel: {
+    ...AppTheme.typography.small,
     fontSize: 10,
-    color: '#999',
+    color: AppTheme.colors.textLight,
   },
   pointerLabel: {
-    backgroundColor: '#333',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 4,
+    backgroundColor: AppTheme.colors.textDark,
+    paddingHorizontal: AppTheme.spacing.sm,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.xs,
   },
   pointerValue: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
 });

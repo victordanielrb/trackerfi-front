@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 import { useWalletTracking } from '../../hooks/useWalletTracking';
 import { useExchangeManagement, ExchangeResponse } from '../../hooks/useExchangeManagement';
 import { useTranslation } from 'react-i18next';
@@ -18,6 +19,7 @@ import AddTrackedWalletForm from '../../components/AddTrackedWalletForm';
 import AddExchangeForm from '../../components/AddExchangeForm';
 import EditExchangeForm from '../../components/EditExchangeForm';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { AppTheme } from '@/constants/theme';
 
 // Web-safe alert function
 const showAlert = (title: string, message: string) => {
@@ -267,7 +269,9 @@ export default function WalletsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>{t('manage_wallets_exchanges')}</Text>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>{t('wallets_exchanges')}</Text>
+        </View>
         
         {/* Tab Buttons */}
         <View style={styles.tabContainer}>
@@ -275,27 +279,27 @@ export default function WalletsScreen() {
             style={[styles.tabButton, activeTab === 'wallets' && styles.activeTabButton]}
             onPress={() => setActiveTab('wallets')}
           >
-            <Text style={[styles.tabButtonText, activeTab === 'wallets' && styles.activeTabButtonText]}>
-              💼 {t('wallets')}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="wallet-outline" size={16} color={activeTab === 'wallets' ? '#fff' : AppTheme.colors.textMuted} />
+              <Text style={[styles.tabButtonText, activeTab === 'wallets' && styles.activeTabButtonText]}>
+                {t('wallets')}
+              </Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.tabButton, activeTab === 'exchanges' && styles.activeTabButton]}
             onPress={() => setActiveTab('exchanges')}
           >
-            <Text style={[styles.tabButtonText, activeTab === 'exchanges' && styles.activeTabButtonText]}>
-              🏦 {t('exchanges')}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="business-outline" size={16} color={activeTab === 'exchanges' ? '#fff' : AppTheme.colors.textMuted} />
+              <Text style={[styles.tabButtonText, activeTab === 'exchanges' && styles.activeTabButtonText]}>
+                {t('exchanges')}
+              </Text>
+            </View>
           </TouchableOpacity>
         </View>
 
         <View style={styles.headerButtons}>
-          <TouchableOpacity
-            style={styles.portfolioButton}
-            onPress={() => router.push('/portfolio')}
-          >
-            <Text style={styles.portfolioButtonText}>📊 {t('view_portfolio')}</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             style={styles.addButton}
             onPress={() => activeTab === 'wallets' ? setModalVisible(true) : setExchangeModalVisible(true)}
@@ -434,52 +438,66 @@ export default function WalletsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   header: {
     flexDirection: 'column',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingTop: 60,
+    paddingBottom: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
+  },
+  headerTop: {
+    width: '100%',
+    marginBottom: AppTheme.spacing.md,
+  },
+  headerTitle: {
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  headerSubtitle: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   title: {
     margin: 10,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
   },
   tabContainer: {
     flexDirection: 'row',
-    backgroundColor: '#f0f0f0',
-    borderRadius: 8,
-    padding: 4,
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: AppTheme.spacing.xs,
     marginVertical: 10,
   },
   tabButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
+    paddingHorizontal: AppTheme.spacing.lg,
+    paddingVertical: AppTheme.spacing.sm,
     borderRadius: 6,
     marginHorizontal: 2,
   },
   activeTabButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
   },
   tabButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   activeTabButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
   headerButtons: {
     marginVertical: 5,
@@ -488,172 +506,163 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   portfolioButton: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.success,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   portfolioButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
-    fontSize: 14,
+    ...AppTheme.typography.body,
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   addButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: AppTheme.spacing.sm,
   },
   errorContainer: {
-    backgroundColor: '#ffebee',
-    padding: 16,
-    margin: 16,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.dangerLight,
+    padding: AppTheme.spacing.md,
+    margin: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#ffcdd2',
+    borderColor: AppTheme.colors.danger,
   },
   errorText: {
-    color: '#c62828',
-    fontSize: 14,
-    marginBottom: 8,
+    color: AppTheme.colors.danger,
+    ...AppTheme.typography.body,
+    marginBottom: AppTheme.spacing.sm,
   },
   retryButton: {
-    backgroundColor: '#f44336',
-    paddingHorizontal: 12,
+    backgroundColor: AppTheme.colors.danger,
+    paddingHorizontal: AppTheme.spacing.md,
     paddingVertical: 6,
-    borderRadius: 4,
+    borderRadius: AppTheme.borderRadius.xs,
     alignSelf: 'flex-start',
   },
   retryButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   listContainer: {
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   walletCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   walletHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   chainBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
   },
   chainText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: '#ff3b30',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    backgroundColor: AppTheme.colors.danger,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
     borderRadius: 6,
   },
   deleteButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   addressText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontFamily: 'monospace',
-    color: '#333',
-    marginBottom: 8,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   walletNote: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     fontStyle: 'italic',
   },
   // Exchange card styles
   exchangeCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   exchangeHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   exchangeBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
   },
   exchangeText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   exchangeActions: {
     flexDirection: 'row',
-    gap: 8,
+    gap: AppTheme.spacing.sm,
   },
   editButton: {
-    backgroundColor: '#ff9500',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    backgroundColor: AppTheme.colors.warning,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
     borderRadius: 6,
   },
   editButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   apiKeyText: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontFamily: 'monospace',
-    color: '#333',
-    marginBottom: 8,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   exchangeNote: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     fontStyle: 'italic',
   },
   modalContainer: {

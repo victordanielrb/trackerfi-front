@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { View, TouchableOpacity, Text, StyleSheet, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { useSettings } from '../contexts/SettingsContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
+import UserSettingsModal from './UserSettingsModal';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -20,7 +23,9 @@ const CURRENCIES: Array<{ code: 'USD'|'BRL'|'EUR'; label: string }> = [
 
 export default function LanguageCurrencySelector() {
   const { language, setLanguage, currency, setCurrency } = useSettings();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
+  const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -30,6 +35,17 @@ export default function LanguageCurrencySelector() {
   return (
     <View style={styles.container} pointerEvents="box-none">
       <View style={styles.buttonRow}>
+        {/* Settings button - only show when authenticated */}
+        {isAuthenticated && (
+          <TouchableOpacity 
+            style={[styles.mainButton, styles.settingsButton]} 
+            onPress={() => setSettingsModalVisible(true)}
+            accessibilityLabel="User settings"
+          >
+            <Ionicons name="settings-outline" size={18} color="#222" />
+          </TouchableOpacity>
+        )}
+        
         <TouchableOpacity style={styles.mainButton} onPress={toggle} accessibilityLabel="Language and currency selector">
           <View style={styles.mainInner}>
             <Text style={[styles.arrow, open && styles.arrowOpen]} accessibilityRole="image">▾</Text>
@@ -56,6 +72,12 @@ export default function LanguageCurrencySelector() {
           </View>
         </View>
       )}
+
+      {/* User Settings Modal */}
+      <UserSettingsModal 
+        visible={settingsModalVisible} 
+        onClose={() => setSettingsModalVisible(false)} 
+      />
     </View>
   );
 }
@@ -150,5 +172,9 @@ const styles = StyleSheet.create({
   },
   currencyTextActive: {
     color: '#fff',
+  },
+  settingsButton: {
+    marginRight: 8,
+    paddingHorizontal: 10,
   },
 });

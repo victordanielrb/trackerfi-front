@@ -19,6 +19,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Print from 'expo-print';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../../contexts/AuthContext';
 import { useWalletTracking, TrackedWalletToken } from '../../hooks/useWalletTracking';
 import { useFuturesPositions } from '../../hooks/useFuturesPositions';
@@ -27,9 +28,10 @@ import FuturesPositionsDisplay from '../../components/FuturesPositionsDisplay';
 import PortfolioChart from '../../components/PortfolioChart';
 import TransactionHistoryModal from '../../components/TransactionHistoryModal';
 import { useSettings } from '../../contexts/SettingsContext';
+import { AppTheme } from '@/constants/theme';
 
 export default function HomeScreen() {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const { t } = useTranslation();
   const router = useRouter();
   const { currency, prices } = useSettings();
@@ -390,10 +392,7 @@ export default function HomeScreen() {
         </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.shareButton} onPress={() => setShareVisible(true)}>
-            <Text style={styles.shareButtonText}>📤</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutButton} onPress={logout}>
-            <Text style={styles.logoutText}>{t('logout')}</Text>
+            <Ionicons name="share-outline" size={20} color="#fff" />
           </TouchableOpacity>
         </View>
       </View>
@@ -481,7 +480,10 @@ export default function HomeScreen() {
           {/* Action Buttons */}
           <View style={styles.shareActions}>
             <TouchableOpacity style={styles.shareActionButton} onPress={onSharePress}>
-              <Text style={styles.shareActionText}>📤 {t('share_portfolio')}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Ionicons name="share-outline" size={18} color="#fff" style={{ marginRight: 6 }} />
+                <Text style={styles.shareActionText}>{t('share_portfolio')}</Text>
+              </View>
             </TouchableOpacity>
           </View>
         </View>
@@ -534,28 +536,28 @@ export default function HomeScreen() {
             style={styles.actionButton}
             onPress={() => router.push('/wallets')}
           >
-            <Text style={styles.actionButtonText}>👛</Text>
+            <Ionicons name="wallet-outline" size={22} color="#fff" />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={() => setTransactionsVisible(true)}
           >
-            <Text style={styles.actionButtonText}>📋</Text>
+            <Ionicons name="receipt-outline" size={22} color="#fff" />
           </TouchableOpacity>
           
           <TouchableOpacity 
             style={styles.actionButton}
             onPress={refreshAll}
           >
-            <Text style={styles.actionButtonText}>🔄</Text>
+            <Ionicons name="refresh-outline" size={22} color="#fff" />
           </TouchableOpacity>
 
           <TouchableOpacity
             style={styles.exportButton}
             onPress={exportPortfolioPDF}
           >
-            <Text style={styles.exportButtonText}>📄</Text>
+            <Ionicons name="document-text-outline" size={22} color={AppTheme.colors.primary} />
           </TouchableOpacity>
         </View>
       </View>
@@ -619,51 +621,35 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
     paddingTop: 60,
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.colors.card,
   },
   welcomeText: {
-    fontSize: 16,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   usernameText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
-  },
-  logoutButton: {
-    backgroundColor: '#ff3b30',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  logoutText: {
-    color: '#fff',
-    fontWeight: '600',
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
   },
   summaryContainer: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
+    padding: AppTheme.spacing.lg,
+    borderRadius: AppTheme.borderRadius.lg,
+    ...AppTheme.shadows.card,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.md,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -672,46 +658,39 @@ const styles = StyleSheet.create({
   statCard: {
     flex: 1,
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    marginHorizontal: 4,
-    marginBottom: 8,
+    padding: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.md,
+    marginHorizontal: AppTheme.spacing.xs,
+    marginBottom: AppTheme.spacing.sm,
   },
   statValue: {
     fontSize: 20,
     fontWeight: 'bold',
-    color: '#007AFF',
-    marginBottom: 4,
+    color: AppTheme.colors.primary,
+    marginBottom: AppTheme.spacing.xs,
   },
   statLabel: {
-    fontSize: 12,
-    padding: 4,
-    color: '#666',
+    ...AppTheme.typography.small,
+    padding: AppTheme.spacing.xs,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-  },  actionsContainer: {
-    backgroundColor: '#fff',
-    margin: 16,
+  },
+  actionsContainer: {
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
     marginTop: 0,
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    padding: AppTheme.spacing.lg,
+    borderRadius: AppTheme.borderRadius.lg,
+    ...AppTheme.shadows.card,
   },
   chartContainer: {
-    backgroundColor: '#fff',
-    margin: 16,
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
     marginTop: 0,
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    borderRadius: AppTheme.borderRadius.lg,
+    padding: AppTheme.spacing.lg,
+    ...AppTheme.shadows.card,
   },
   actionButtons: {
     flexDirection: 'row',
@@ -719,44 +698,40 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     flex: 1,
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
+    backgroundColor: AppTheme.colors.primary,
+    paddingVertical: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
+    marginHorizontal: AppTheme.spacing.xs,
     alignItems: 'center',
   },
   actionButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
-    fontSize: 14,
+    ...AppTheme.typography.body,
   },
   exportButton: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.colors.card,
     borderWidth: 1,
-    borderColor: '#007AFF',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginHorizontal: 4,
+    borderColor: AppTheme.colors.primary,
+    paddingVertical: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
+    marginHorizontal: AppTheme.spacing.xs,
     alignItems: 'center',
   },
   exportButtonText: {
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     fontWeight: '600',
-    fontSize: 14,
+    ...AppTheme.typography.body,
   },
   portfolioContainer: {
-    backgroundColor: '#fff',
-    margin: 16,
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
     marginTop: 0,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    paddingTop: 20,
-    paddingHorizontal: 20,
+    borderRadius: AppTheme.borderRadius.lg,
+    ...AppTheme.shadows.card,
+    paddingTop: AppTheme.spacing.lg,
+    paddingHorizontal: AppTheme.spacing.lg,
     marginBottom: 40,
   },
   emptyState: {
@@ -764,43 +739,42 @@ const styles = StyleSheet.create({
     padding: 40,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 8,
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: AppTheme.spacing.lg,
   },
   addWalletButton: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.success,
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingVertical: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   addWalletButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
-    fontSize: 16,
+    ...AppTheme.typography.body,
   },
   headerButtons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   shareButton: {
-    marginRight: 8,
-    backgroundColor: '#007AFF',
+    marginRight: AppTheme.spacing.sm,
+    backgroundColor: AppTheme.colors.primary,
     paddingHorizontal: 10,
-    paddingVertical: 8,
-    borderRadius: 8,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
     alignItems: 'center',
     justifyContent: 'center',
   },
   shareButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontSize: 16,
   },
   modalOverlay: {
@@ -808,12 +782,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   shareCard: {
     width: 340,
     height: 500,
-    borderRadius: 24,
+    borderRadius: AppTheme.borderRadius.xl,
     padding: 32,
     alignItems: 'center',
     shadowColor: '#000',
@@ -822,35 +796,35 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 12,
     justifyContent: 'space-between',
-    marginBottom: 24,
+    marginBottom: AppTheme.spacing.xl,
   },
   shareTitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '700',
-    color: '#333',
-    marginBottom: 8,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   shareValue: {
     fontSize: 28,
     fontWeight: '800',
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     marginBottom: 6,
   },
   shareChange: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   shareMetaRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignSelf: 'stretch',
-    paddingHorizontal: 12,
-    marginBottom: 16,
+    paddingHorizontal: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
   },
   shareMeta: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
   },
   shareActions: {
     flexDirection: 'row',
@@ -860,23 +834,23 @@ const styles = StyleSheet.create({
   },
   shareActionButton: {
     flex: 1,
-    marginHorizontal: 8,
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
+    marginHorizontal: AppTheme.spacing.sm,
+    backgroundColor: AppTheme.colors.primary,
+    paddingVertical: AppTheme.spacing.md,
     borderRadius: 10,
     alignItems: 'center',
   },
   shareActionText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '700',
   },
   closeButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
   shareAttribution: {
     fontSize: 10,
-    color: '#999',
-    marginTop: 8,
+    color: AppTheme.colors.textLight,
+    marginTop: AppTheme.spacing.sm,
     fontStyle: 'italic',
   },
   // New gradient share card styles
@@ -893,25 +867,25 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modalCloseText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontSize: 18,
     fontWeight: 'bold',
   },
   shareHeader: {
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: AppTheme.spacing.xl,
   },
   shareAppName: {
     fontSize: 24,
     fontWeight: '900',
-    color: '#fff',
+    color: AppTheme.colors.card,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 3,
-    marginBottom: 4,
+    marginBottom: AppTheme.spacing.xs,
   },
   shareSubtitle: {
-    fontSize: 14,
+    ...AppTheme.typography.body,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.9)',
     textTransform: 'uppercase',
@@ -919,43 +893,43 @@ const styles = StyleSheet.create({
   },
   shareContent: {
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
     flex: 1,
     justifyContent: 'center',
   },
   shareTotalLabel: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.8)',
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
   },
   shareTotalValue: {
     fontSize: 36,
     fontWeight: '900',
-    color: '#fff',
+    color: AppTheme.colors.card,
     textShadowColor: 'rgba(0,0,0,0.3)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 4,
-    marginBottom: 16,
+    marginBottom: AppTheme.spacing.md,
   },
   shareChangeContainer: {
     flexDirection: 'row',
     alignItems: 'baseline',
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
   },
   shareChangeValue: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#fff',
-    marginRight: 8,
+    color: AppTheme.colors.card,
+    marginRight: AppTheme.spacing.sm,
     textShadowColor: 'rgba(0,0,0,0.2)',
     textShadowOffset: { width: 1, height: 1 },
     textShadowRadius: 2,
   },
   shareChangePercent: {
-    fontSize: 18,
+    ...AppTheme.typography.sectionTitle,
     fontWeight: '700',
     color: 'rgba(255,255,255,0.9)',
     textShadowColor: 'rgba(0,0,0,0.2)',
@@ -963,33 +937,33 @@ const styles = StyleSheet.create({
     textShadowRadius: 2,
   },
   shareTimeLabel: {
-    fontSize: 12,
+    ...AppTheme.typography.small,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.7)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   shareStatsRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    paddingHorizontal: 12,
+    paddingHorizontal: AppTheme.spacing.md,
     marginTop: 6,
   },
   shareStatItem: {
     alignItems: 'center',
     backgroundColor: 'rgba(255,255,255,0.08)',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    borderRadius: AppTheme.borderRadius.md,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
     minWidth: 72,
     marginHorizontal: 6,
   },
   shareStatValue: {
     fontSize: 20,
     fontWeight: '800',
-    color: '#fff',
+    color: AppTheme.colors.card,
     marginBottom: 2,
   },
   shareStatLabel: {
@@ -1004,10 +978,10 @@ const styles = StyleSheet.create({
     marginTop: 'auto',
   },
   shareFooterText: {
-    fontSize: 12,
+    ...AppTheme.typography.small,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.8)',
-    marginBottom: 4,
+    marginBottom: AppTheme.spacing.xs,
   },
   shareWatermark: {
     fontSize: 10,
@@ -1021,7 +995,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.3)',
   },
   cancelActionText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
 });

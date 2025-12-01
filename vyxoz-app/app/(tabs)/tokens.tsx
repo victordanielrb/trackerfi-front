@@ -5,6 +5,8 @@ import { useAuth } from '../../contexts/AuthContext';
 import { getApiUrl, API_CONFIG } from '../../constants/api';
 import { useTranslation } from 'react-i18next';
 import TradingChart from '../../components/TradingChart';
+import { AppTheme } from '@/constants/theme';
+import { Ionicons } from '@expo/vector-icons';
 
 interface TokenSearchResult {
   id: string;
@@ -258,9 +260,16 @@ export default function TokensScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+    <View style={styles.safeContainer}>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>{t('tokens')}</Text>
+        <Text style={styles.headerSubtitle}>{t('track_favorite_tokens')}</Text>
+      </View>
+      
+      <ScrollView style={styles.container}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
           placeholder="Buscar token (Bitcoin, ETH, etc.)"
@@ -278,7 +287,7 @@ export default function TokensScreen() {
           autoCapitalize="none"
         />
         {searchLoading && (
-          <ActivityIndicator style={styles.searchLoader} size="small" color="#007AFF" />
+          <ActivityIndicator style={styles.searchLoader} size="small" color={AppTheme.colors.primary} />
         )}
       </View>
 
@@ -307,7 +316,9 @@ export default function TokensScreen() {
             setAlertsModalVisible(true);
           }}
         >
-          <Text style={styles.alertsHeaderBtnText}>🔔 Alertas</Text>
+          <Text style={styles.alertsHeaderBtnText}>
+            <Ionicons name="notifications-outline" size={16} color="#fff" /> Alertas
+          </Text>
         </TouchableOpacity>
       </View>
       <FlatList
@@ -341,7 +352,7 @@ export default function TokensScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             {detailLoading ? (
-              <ActivityIndicator size="large" color="#007AFF" style={{ margin: 20 }} />
+              <ActivityIndicator size="large" color={AppTheme.colors.primary} style={{ margin: 20 }} />
             ) : selectedToken ? (
               <ScrollView style={styles.modalScrollView} showsVerticalScrollIndicator={true}>
                 <TouchableOpacity style={styles.closeBtn} onPress={() => setDetailModalVisible(false)}>
@@ -487,98 +498,168 @@ export default function TokensScreen() {
           </View>
         </View>
       </Modal>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
-  title: { fontSize: 18, fontWeight: '700', marginBottom: 8, marginTop: 16 },
+  safeContainer: {
+    flex: 1,
+    backgroundColor: AppTheme.colors.background,
+  },
+  header: {
+    backgroundColor: AppTheme.colors.card,
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingTop: 60,
+    paddingBottom: AppTheme.spacing.lg,
+  },
+  headerTitle: {
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  headerSubtitle: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+  },
+  container: { 
+    flex: 1, 
+    padding: AppTheme.spacing.md, 
+    backgroundColor: AppTheme.colors.background 
+  },
+  title: { 
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm, 
+    marginTop: AppTheme.spacing.md 
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.sm,
   },
   alertsHeaderBtn: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 12,
+    backgroundColor: AppTheme.colors.primary,
+    paddingHorizontal: AppTheme.spacing.md,
     paddingVertical: 6,
-    borderRadius: 8,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   alertsHeaderBtnText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
-    fontSize: 14,
+    ...AppTheme.typography.body,
   },
-  tokenRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#eee', backgroundColor: '#fff' },
+  tokenRow: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    paddingVertical: AppTheme.spacing.sm, 
+    borderBottomWidth: 1, 
+    borderBottomColor: AppTheme.colors.border, 
+    backgroundColor: AppTheme.colors.card 
+  },
   favoriteTokenRow: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    paddingVertical: 12, 
-    paddingHorizontal: 16,
+    paddingVertical: AppTheme.spacing.md, 
+    paddingHorizontal: AppTheme.spacing.md,
     borderBottomWidth: 1, 
-    borderBottomColor: '#eee', 
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    marginBottom: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1
+    borderBottomColor: AppTheme.colors.border, 
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.sm,
+    marginBottom: AppTheme.spacing.xs,
+    ...AppTheme.shadows.card,
   },
-  tokenText: { fontSize: 16 },
-  tokenSub: { color: '#666' },
-  section: { marginTop: 24 },
-  alertRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#f2f2f2', backgroundColor: '#fff' },
-  small: { color: '#999', fontSize: 12 },
-  formRow: { flexDirection: 'row', marginTop: 12, alignItems: 'center' },
-  input: { flex: 1, borderWidth: 1, borderColor: '#ddd', padding: 8, borderRadius: 8, marginRight: 8, backgroundColor: '#fff' },
-  btn: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8 },
-  btnPrimary: { backgroundColor: '#34C759' },
-  btnOutline: { borderWidth: 1, borderColor: '#ccc' },
-  btnText: { color: '#fff', fontWeight: '700' },
-  btnCreate: { backgroundColor: '#007AFF', paddingVertical: 10, paddingHorizontal: 16, borderRadius: 8, marginLeft: 8 },
+  tokenText: { 
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textDark,
+  },
+  tokenSub: { 
+    color: AppTheme.colors.textMuted,
+    ...AppTheme.typography.small,
+  },
+  section: { marginTop: AppTheme.spacing.xl },
+  alertRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: AppTheme.spacing.sm, 
+    borderBottomWidth: 1, 
+    borderBottomColor: AppTheme.colors.cardInner, 
+    backgroundColor: AppTheme.colors.card 
+  },
+  small: { 
+    color: AppTheme.colors.textLight, 
+    ...AppTheme.typography.small,
+  },
+  formRow: { 
+    flexDirection: 'row', 
+    marginTop: AppTheme.spacing.md, 
+    alignItems: 'center' 
+  },
+  input: { 
+    flex: 1, 
+    borderWidth: 1, 
+    borderColor: AppTheme.colors.border, 
+    padding: AppTheme.spacing.sm, 
+    borderRadius: AppTheme.borderRadius.sm, 
+    marginRight: AppTheme.spacing.sm, 
+    backgroundColor: AppTheme.colors.card 
+  },
+  btn: { 
+    paddingVertical: 10, 
+    paddingHorizontal: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.sm 
+  },
+  btnPrimary: { backgroundColor: AppTheme.colors.success },
+  btnOutline: { borderWidth: 1, borderColor: AppTheme.colors.border },
+  btnText: { color: AppTheme.colors.card, fontWeight: '700' },
+  btnCreate: { 
+    backgroundColor: AppTheme.colors.primary, 
+    paddingVertical: 10, 
+    paddingHorizontal: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.sm, 
+    marginLeft: AppTheme.spacing.sm 
+  },
   
   // Search styles
-  searchContainer: { marginVertical: 16, position: 'relative' },
+  searchContainer: { marginVertical: AppTheme.spacing.md, position: 'relative' },
   searchInput: { 
-    backgroundColor: '#fff', 
-    padding: 12, 
-    borderRadius: 12, 
+    backgroundColor: AppTheme.colors.card, 
+    padding: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.md, 
     borderWidth: 1, 
-    borderColor: '#ddd',
-    fontSize: 16
+    borderColor: AppTheme.colors.border,
+    ...AppTheme.typography.body,
   },
-  searchLoader: { position: 'absolute', right: 12, top: 12 },
+  searchLoader: { position: 'absolute', right: AppTheme.spacing.md, top: AppTheme.spacing.md },
   searchResultsContainer: { 
-    backgroundColor: '#fff', 
-    borderRadius: 12, 
-    marginTop: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: AppTheme.colors.card, 
+    borderRadius: AppTheme.borderRadius.md, 
+    marginTop: AppTheme.spacing.sm,
+    ...AppTheme.shadows.card,
     maxHeight: 300
   },
   searchResultItem: { 
-    padding: 12, 
+    padding: AppTheme.spacing.md, 
     borderBottomWidth: 1, 
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: AppTheme.colors.cardInner,
     flexDirection: 'row',
     alignItems: 'center'
   },
   searchResultSymbol: { 
-    fontSize: 16, 
+    ...AppTheme.typography.body,
     fontWeight: '700',
-    color: '#007AFF',
-    marginRight: 8,
+    color: AppTheme.colors.primary,
+    marginRight: AppTheme.spacing.sm,
     minWidth: 60
   },
-  searchResultName: { fontSize: 14, color: '#666', flex: 1 },
+  searchResultName: { 
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted, 
+    flex: 1 
+  },
 
   // Modal styles
   modalOverlay: {
@@ -588,84 +669,124 @@ const styles = StyleSheet.create({
     alignItems: 'center'
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 16,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.lg,
     width: '90%',
     maxHeight: '80%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 8
+    ...AppTheme.shadows.card,
   },
   modalScrollView: {
-    padding: 20,
+    padding: AppTheme.spacing.lg,
     flexGrow: 1
   },
   closeBtn: { 
     alignSelf: 'flex-end',
-    padding: 8,
-    marginBottom: 8
+    padding: AppTheme.spacing.sm,
+    marginBottom: AppTheme.spacing.sm
   },
-  closeBtnText: { fontSize: 24, color: '#666' },
-  modalTitle: { fontSize: 24, fontWeight: '700', marginBottom: 4, marginTop: 8 },
-  modalSymbol: { fontSize: 16, color: '#666', marginBottom: 16 },
+  closeBtnText: { fontSize: 24, color: AppTheme.colors.textMuted },
+  modalTitle: { 
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs, 
+    marginTop: AppTheme.spacing.sm 
+  },
+  modalSymbol: { 
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted, 
+    marginBottom: AppTheme.spacing.md 
+  },
   
   detailRow: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
-    paddingVertical: 12,
+    paddingVertical: AppTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0'
+    borderBottomColor: AppTheme.colors.cardInner
   },
-  detailLabel: { fontSize: 16, color: '#666' },
-  detailValue: { fontSize: 16, fontWeight: '600' },
+  detailLabel: { 
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted 
+  },
+  detailValue: { 
+    ...AppTheme.typography.body,
+    fontWeight: '600',
+    color: AppTheme.colors.textDark,
+  },
   
   chartBtn: { 
-    backgroundColor: '#007AFF', 
-    padding: 16, 
-    borderRadius: 12, 
-    marginTop: 16,
+    backgroundColor: AppTheme.colors.primary, 
+    padding: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.md, 
+    marginTop: AppTheme.spacing.md,
     alignItems: 'center'
   },
-  chartBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  chartBtnText: { 
+    color: AppTheme.colors.card, 
+    ...AppTheme.typography.body,
+    fontWeight: '700' 
+  },
   
   favoriteBtn: { 
-    backgroundColor: '#34C759', 
-    padding: 16, 
-    borderRadius: 12, 
-    marginTop: 8,
+    backgroundColor: AppTheme.colors.success, 
+    padding: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.md, 
+    marginTop: AppTheme.spacing.sm,
     alignItems: 'center'
   },
-  favoriteBtnText: { color: '#fff', fontSize: 16, fontWeight: '700' },
+  favoriteBtnText: { 
+    color: AppTheme.colors.card, 
+    ...AppTheme.typography.body,
+    fontWeight: '700' 
+  },
   
   removeBtn: { 
-    backgroundColor: '#FF3B30', 
-    padding: 8, 
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.danger, 
+    padding: AppTheme.spacing.sm, 
+    borderRadius: AppTheme.borderRadius.sm,
     alignItems: 'center',
     minWidth: 80
   },
-  removeBtnText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  removeBtnText: { 
+    color: AppTheme.colors.card, 
+    ...AppTheme.typography.body,
+    fontWeight: '600' 
+  },
   
   tradingSection: { 
-    marginBottom: 16,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 8
+    marginBottom: AppTheme.spacing.md,
+    padding: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.sm
   },
-  sectionTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  tradingText: { fontSize: 14, marginVertical: 2 },
-  ohlcText: { fontSize: 12, color: '#666', marginVertical: 2, fontFamily: 'monospace' },
+  sectionTitle: { 
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm 
+  },
+  tradingText: { 
+    ...AppTheme.typography.body,
+    marginVertical: 2 
+  },
+  ohlcText: { 
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted, 
+    marginVertical: 2, 
+    fontFamily: 'monospace' 
+  },
   
   backBtn: { 
-    backgroundColor: '#666', 
-    padding: 16, 
-    borderRadius: 12, 
-    marginTop: 8,
+    backgroundColor: AppTheme.colors.textMuted, 
+    padding: AppTheme.spacing.md, 
+    borderRadius: AppTheme.borderRadius.md, 
+    marginTop: AppTheme.spacing.sm,
     alignItems: 'center'
   },
-  backBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  backBtnText: { 
+    color: AppTheme.colors.card, 
+    ...AppTheme.typography.body,
+    fontWeight: '600' 
+  },
   
   // Chart modal styles - fullscreen
   chartModalOverlay: {
@@ -679,84 +800,97 @@ const styles = StyleSheet.create({
   },
   
   // Alert styles
-  alertToken: { fontSize: 16, fontWeight: '700', color: '#333' },
-  alertDetail: { fontSize: 14, color: '#666', marginTop: 2 },
-  emptyText: { textAlign: 'center', color: '#999', marginTop: 16, fontStyle: 'italic' },
+  alertToken: { 
+    ...AppTheme.typography.body,
+    fontWeight: '700', 
+    color: AppTheme.colors.textDark 
+  },
+  alertDetail: { 
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted, 
+    marginTop: 2 
+  },
+  emptyText: { 
+    textAlign: 'center', 
+    color: AppTheme.colors.textLight, 
+    marginTop: AppTheme.spacing.md, 
+    fontStyle: 'italic' 
+  },
   
   // Modal Alert Section
   modalAlertSection: {
-    marginTop: 24,
+    marginTop: AppTheme.spacing.xl,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
-    paddingTop: 16,
+    borderTopColor: AppTheme.colors.border,
+    paddingTop: AppTheme.spacing.md,
   },
   createAlertBtn: {
-    backgroundColor: '#f0f9ff',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: AppTheme.colors.primaryLight,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: AppTheme.colors.primary,
   },
   createAlertBtnText: {
-    color: '#007AFF',
+    color: AppTheme.colors.primary,
     fontWeight: '600',
-    fontSize: 16,
+    ...AppTheme.typography.body,
   },
   alertForm: {
-    marginTop: 16,
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 12,
+    marginTop: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.cardInner,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.md,
   },
   alertFormLabel: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+    marginBottom: AppTheme.spacing.md,
   },
   alertTypeContainer: {
     flexDirection: 'row',
-    marginBottom: 12,
-    gap: 8,
+    marginBottom: AppTheme.spacing.md,
+    gap: AppTheme.spacing.sm,
   },
   typeBtn: {
     flex: 1,
     padding: 10,
-    borderRadius: 8,
+    borderRadius: AppTheme.borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppTheme.colors.border,
     alignItems: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.colors.card,
   },
   typeBtnActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
+    borderColor: AppTheme.colors.primary,
   },
   typeBtnText: {
-    color: '#666',
+    color: AppTheme.colors.textDark,
     fontWeight: '600',
   },
   typeBtnTextActive: {
-    color: '#fff',
+    color: AppTheme.colors.card,
   },
   alertInput: {
-    backgroundColor: '#fff',
+    backgroundColor: AppTheme.colors.card,
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    marginBottom: 12,
+    borderColor: AppTheme.colors.border,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: AppTheme.spacing.md,
+    ...AppTheme.typography.body,
+    marginBottom: AppTheme.spacing.md,
   },
   saveAlertBtn: {
-    backgroundColor: '#007AFF',
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
     alignItems: 'center',
   },
   saveAlertBtnText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '700',
-    fontSize: 16,
+    ...AppTheme.typography.body,
   },
 });

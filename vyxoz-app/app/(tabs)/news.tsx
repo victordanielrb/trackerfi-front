@@ -1,7 +1,9 @@
 import React from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Alert, Image } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppTheme } from '@/constants/theme';
 
 interface NewsSource {
   name: string;
@@ -235,53 +237,47 @@ export default function NoticiasScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   header: {
-    backgroundColor: '#fff',
-    padding: 20,
+    backgroundColor: AppTheme.colors.card,
+    padding: AppTheme.spacing.lg,
     paddingTop: 60,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   section: {
-    backgroundColor: '#fff',
-    margin: 16,
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
+    padding: AppTheme.spacing.lg,
+    borderRadius: AppTheme.borderRadius.lg,
+    ...AppTheme.shadows.card,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 16,
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.md,
   },
   card: {
-    backgroundColor: '#f8f9fa',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: AppTheme.colors.border,
     position: 'relative',
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   iconContainer: {
     width: 48,
@@ -289,27 +285,26 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: AppTheme.spacing.md,
   },
   logoImage: {
     width: 54,
     height: 54,
-    borderRadius: 12,
-    marginRight: 12,
-    backgroundColor: '#fff'
+    borderRadius: AppTheme.borderRadius.md,
+    marginRight: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.card,
   },
   cardInfo: {
     flex: 1,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    ...AppTheme.typography.label,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
   },
   cardDescription: {
-    fontSize: 13,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
   },
   cardFooter: {
     flexDirection: 'row',
@@ -319,40 +314,40 @@ const styles = StyleSheet.create({
   categoryBadge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: AppTheme.borderRadius.md,
   },
   categoryText: {
     fontSize: 11,
     fontWeight: '600',
   },
   languageContainer: {
-    backgroundColor: '#e0e0e0',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.border,
+    paddingHorizontal: AppTheme.spacing.sm,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   languageText: {
     fontSize: 11,
     fontWeight: '600',
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   arrowContainer: {
     position: 'absolute',
-    right: 16,
+    right: AppTheme.spacing.md,
     top: '50%',
     transform: [{ translateY: -10 }],
   },
   infoFooter: {
-    backgroundColor: '#fff',
-    margin: 16,
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
     marginTop: 0,
-    padding: 16,
-    borderRadius: 12,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.md,
     alignItems: 'center',
   },
   infoText: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
   },
 });

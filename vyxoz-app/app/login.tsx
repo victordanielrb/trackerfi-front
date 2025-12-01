@@ -12,8 +12,11 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useBiometricAuth } from '../hooks/useBiometricAuth';
 import { router } from 'expo-router';
+import { AppTheme } from '@/constants/theme';
 // debug/test UI removed for production
 
 // Web-safe alert function
@@ -37,12 +40,77 @@ export default function LoginScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   
   const { login, register, isLoading, isAuthenticated } = useAuth();
+  const { 
+    isAvailable, 
+    isEnabled, 
+    biometricType, 
+    authenticate, 
+    getStoredCredentials,
+    checkBiometricAvailability 
+  } = useBiometricAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
       router.replace('/portfolio');
     }
   }, [isAuthenticated]);
+
+  // Check biometric availability on mount
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
+
+  const getBiometricIcon = () => {
+    switch (biometricType) {
+      case 'facial':
+        return 'scan-outline';
+      case 'fingerprint':
+        return 'finger-print-outline';
+      case 'iris':
+        return 'eye-outline';
+      default:
+        return 'finger-print-outline';
+    }
+  };
+
+  const getBiometricLabel = () => {
+    return t('login_with_biometric') || 'Login with Biometry';
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      // First authenticate with biometric
+      const authResult = await authenticate(t('authenticate_to_login') || 'Authenticate to login');
+      
+      if (!authResult.success) {
+        if (authResult.error !== 'Authentication cancelled') {
+          showAlert(t('error') || 'Error', authResult.error || t('biometric_failed') || 'Biometric authentication failed');
+        }
+        return;
+      }
+
+      // Get stored credentials
+      const credentials = await getStoredCredentials();
+      if (!credentials) {
+        showAlert(
+          t('error') || 'Error', 
+          t('no_stored_credentials') || 'No stored credentials found. Please login with email and password first.'
+        );
+        return;
+      }
+
+      // Login with stored credentials
+      const result = await login(credentials.email, credentials.password);
+      if (result.success) {
+        router.replace('/portfolio');
+      } else {
+        showAlert(t('login_failed') || 'Login Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Biometric login error:', error);
+      showAlert(t('error') || 'Error', t('something_went_wrong') || 'Something went wrong');
+    }
+  };
 
   const handleSubmit = async () => {
     if (isLoginMode) {
@@ -195,6 +263,26 @@ export default function LoginScreen() {
             </Text>
           </TouchableOpacity>
 
+          {/* Biometric Login Button - show in login mode when biometric is available */}
+          {isLoginMode && isAvailable && (
+            <View style={styles.biometricSection}>
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>{t('or') || 'or'}</Text>
+                <View style={styles.divider} />
+              </View>
+              
+              <TouchableOpacity
+                style={[styles.biometricButton, isLoading && styles.disabledButton]}
+                onPress={handleBiometricLogin}
+                disabled={isLoading}
+              >
+                <Ionicons name={getBiometricIcon()} size={24} color="#007AFF" />
+                <Text style={styles.biometricButtonText}>{getBiometricLabel()}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           {/* Debug and test buttons removed */}
         </View>
       </ScrollView>
@@ -205,7 +293,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   languageSelector: {
     position: 'absolute',
@@ -214,116 +302,102 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     zIndex: 10,
     backgroundColor: 'rgba(255,255,255,0.95)',
-    borderRadius: 20,
-    paddingVertical: 4,
+    borderRadius: AppTheme.borderRadius.xl,
+    paddingVertical: AppTheme.spacing.xs,
     paddingHorizontal: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
+    ...AppTheme.shadows.card,
   },
   langButton: {
-    marginHorizontal: 4,
-    paddingHorizontal: 8,
+    marginHorizontal: AppTheme.spacing.xs,
+    paddingHorizontal: AppTheme.spacing.sm,
     paddingVertical: 2,
-    borderRadius: 12,
-    backgroundColor: '#eee',
+    borderRadius: AppTheme.borderRadius.md,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   langButtonActive: {
-    backgroundColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
   },
   langText: {
     fontWeight: 'bold',
-    color: '#333',
+    color: AppTheme.colors.textDark,
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.lg,
     padding: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...AppTheme.shadows.card,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...AppTheme.typography.title,
     textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
+    marginBottom: AppTheme.spacing.sm,
+    color: AppTheme.colors.textDark,
   },
   subtitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     textAlign: 'center',
     marginBottom: 30,
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: AppTheme.spacing.lg,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
+    ...AppTheme.typography.label,
+    marginBottom: AppTheme.spacing.sm,
+    color: AppTheme.colors.textDark,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: AppTheme.colors.border,
+    borderRadius: AppTheme.borderRadius.sm,
     padding: 15,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
+    ...AppTheme.typography.body,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   submitButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    borderRadius: AppTheme.borderRadius.sm,
     padding: 15,
     alignItems: 'center',
     marginTop: 10,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.sectionTitle,
   },
   toggleButton: {
-    marginTop: 20,
+    marginTop: AppTheme.spacing.lg,
     alignItems: 'center',
   },
   toggleButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
+    color: AppTheme.colors.primary,
+    ...AppTheme.typography.body,
   },
   testButtonsContainer: {
     marginTop: 30,
-    paddingTop: 20,
+    paddingTop: AppTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: AppTheme.colors.border,
   },
   testSectionTitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 15,
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   testButton: {
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: AppTheme.spacing.md,
     alignItems: 'center',
     marginBottom: 10,
     borderWidth: 2,
@@ -331,14 +405,48 @@ const styles = StyleSheet.create({
   },
   testRegisterButton: {
     backgroundColor: '#E8F5E8',
-    borderColor: '#4CAF50',
+    borderColor: AppTheme.colors.success,
   },
   testLoginButton: {
     backgroundColor: '#E3F2FD',
-    borderColor: '#2196F3',
+    borderColor: AppTheme.colors.primary,
   },
   testButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
+  },
+  biometricSection: {
+    marginTop: AppTheme.spacing.xl,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: AppTheme.spacing.lg,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: AppTheme.colors.border,
+  },
+  dividerText: {
+    paddingHorizontal: AppTheme.spacing.md,
+    color: AppTheme.colors.textMuted,
+    ...AppTheme.typography.body,
+  },
+  biometricButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppTheme.colors.primaryLight,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: AppTheme.colors.primary,
+  },
+  biometricButtonText: {
+    color: AppTheme.colors.primary,
+    ...AppTheme.typography.body,
+    fontWeight: '600',
+    marginLeft: 10,
   },
 });

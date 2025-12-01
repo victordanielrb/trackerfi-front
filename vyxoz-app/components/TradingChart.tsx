@@ -223,7 +223,7 @@ const CHART_HTML = `
             </div>
             <div id="indicators-section">
                 <div id="indicators-toggle" onclick="toggleIndicators()">
-                    <span>📊 Indicators</span>
+                    <span>▦ Indicators</span>
                     <span class="arrow">▼</span>
                 </div>
                 <div id="indicators-list">

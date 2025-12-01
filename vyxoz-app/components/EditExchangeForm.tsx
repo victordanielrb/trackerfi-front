@@ -10,8 +10,10 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { ExchangeResponse, useExchangeManagement } from '../hooks/useExchangeManagement';
+import { AppTheme } from '@/constants/theme';
 
 interface EditExchangeFormProps {
   exchange: ExchangeResponse;
@@ -144,17 +146,16 @@ export default function EditExchangeForm({ exchange, onUpdateExchange, onCancel 
                 style={styles.toggleButton}
                 onPress={() => setShowApiSecret(!showApiSecret)}
               >
-                <Text style={styles.toggleButtonText}>
-                  {showApiSecret ? '👁️' : '👁️‍🗨️'}
-                </Text>
+                <Ionicons name={showApiSecret ? 'eye' : 'eye-off'} size={20} color="#6B7280" />
               </TouchableOpacity>
             </View>
           </View>
 
           <View style={styles.securityNote}>
-            <Text style={styles.securityNoteText}>
-              🔒 {t('exchange_update_security_note')}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="lock-closed" size={14} color="#666" />
+              <Text style={styles.securityNoteText}>{t('exchange_update_security_note')}</Text>
+            </View>
           </View>
 
           {error && (
@@ -298,30 +299,30 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
+    borderRadius: AppTheme.borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#ddd',
-    backgroundColor: '#f9f9f9',
+    borderColor: AppTheme.colors.border,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   cancelButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
-    color: '#666',
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
   },
   submitButton: {
     flex: 1,
     paddingVertical: 12,
-    borderRadius: 8,
-    backgroundColor: '#ff9500',
+    borderRadius: AppTheme.borderRadius.sm,
+    backgroundColor: AppTheme.colors.warning,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
   submitButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
-    color: '#fff',
+    color: AppTheme.colors.card,
     textAlign: 'center',
   },
   loadingContainer: {
@@ -330,8 +331,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 16,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
   },
   passwordContainer: {

@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useWalletTokens, Token } from '../hooks/useWalletTokens';
 
 interface TokenDisplayProps {
@@ -159,7 +160,10 @@ export default function TokenDisplay({
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>⚠️ {error}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Ionicons name="warning" size={18} color="#FF3B30" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
         <TouchableOpacity style={styles.retryButton} onPress={refreshData}>
           <Text style={styles.retryText}>Retry</Text>
         </TouchableOpacity>
