@@ -39,6 +39,16 @@
             "backgroundColor": "#000000"
           }
         }
+      ],
+      [
+        "expo-asset",
+        {
+          "assets": [
+            "./assets/images/cointelegraph.jpg",
+            "./assets/images/beincrypto.png",
+            "./assets/images/bbcnews.jpg"
+          ]
+        }
       ]
     ],
     "experiments": {

@@ -1,37 +1,54 @@
 import { useState, useEffect, useRef } from 'react';
 import { Platform } from 'react-native';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { getApiUrl } from '../constants/api';
 
-// Configure how notifications are handled when app is in foreground
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// Conditionally import Notifications only on native platforms
+let Notifications: any = null;
+if (Platform.OS !== 'web') {
+  Notifications = require('expo-notifications');
+
+  // Configure how notifications are handled when app is in foreground (native only)
+  Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+      shouldShowAlert: true,
+      shouldPlaySound: true,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    }),
+  });
+}
 
 export interface PushNotificationState {
   expoPushToken: string | null;
-  notification: Notifications.Notification | null;
+  notification: any | null;
   error: string | null;
 }
 
 export function usePushNotifications() {
   const [expoPushToken, setExpoPushToken] = useState<string | null>(null);
-  const [notification, setNotification] = useState<Notifications.Notification | null>(null);
+  const [notification, setNotification] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { token, isAuthenticated } = useAuth();
-  
-  const notificationListener = useRef<Notifications.EventSubscription | null>(null);
-  const responseListener = useRef<Notifications.EventSubscription | null>(null);
+
+  const notificationListener = useRef<any | null>(null);
+  const responseListener = useRef<any | null>(null);
+
+  // Early return on web - notifications not supported
+  if (Platform.OS === 'web' || !Notifications) {
+    return {
+      expoPushToken: null,
+      notification: null,
+      error: 'Push notifications not supported on web',
+      registerForPushNotificationsAsync: async () => null,
+      savePushTokenToBackend: async () => {},
+      removePushTokenFromBackend: async () => {},
+    };
+  }
 
   // Register for push notifications
   async function registerForPushNotificationsAsync(): Promise<string | null> {

@@ -1,6 +1,7 @@
 import React from 'react';
-import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Alert, Image } from 'react-native';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Alert, Image, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { useAssets } from 'expo-asset';
 import { Ionicons } from '@expo/vector-icons';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { AppTheme } from '@/constants/theme';
@@ -11,19 +12,12 @@ interface NewsSource {
   url: string;
   category: 'crypto' | 'general';
   language: 'pt' | 'en' | 'es';
-  icon: string; // fallback icon if logo not available
+  icon: string;
   color: string;
-  logo?: string; // remote logo/image URI
+  logoIndex?: number;
 }
 
-// Remote logos provided by user. If any fail or load slowly, component falls back to icon.
-const BEINCRYPTO_LOGO = 'https://scontent-gru1-2.xx.fbcdn.net/v/t39.30808-6/567441633_1301124902026451_2035337638933684744_n.jpg?_nc_cat=100&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeEJtI6UXwH0odKysrRJ3TIkA_c9lvSAOuYD9z2W9IA65nTgXmdc_AYSeHcZJXuoXUxuc1zMNlXPNqU66dDXtsaF&_nc_ohc=bc6c0Zxs4YwQ7kNvwE3tCLj&_nc_oc=AdmIG_Qx_00Zx5OBdBNTa-4ctfvg6otkLY88FNP4-KfdcPc7qXizptGljXaDn-qli14phoNgxLTlPhSsWelqTftB&_nc_zt=23&_nc_ht=scontent-gru1-2.xx&_nc_gid=1j71fQ5A-Hc3umur2wgA9Q&oh=00_AfjVzb9Dxv9BanOjxLcXc4qyp_A8c1OMJj-XkoPcdaJYQA&oe=692B14C3';
-const COINTELEGRAPH_LOGO = 'https://scontent-gru1-1.xx.fbcdn.net/v/t39.30808-6/339733955_236683938826968_6836318394336583613_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeGR4ZYHUyylZZl-fghRAgH8cs6VTrNht55yzpVOs2G3nvg9sa-qSXRQyRqX8z2NC-Hs5dmHflKodnrKy7v4M-G2&_nc_ohc=4q6xNcYADscQ7kNvwH4L1WF&_nc_oc=AdkGUaK3ICnr9HXJ2tO7bFRLz7WUB2qQg2H6xtjDBLj1laxx5AUCaN0Z3D5rZGhkFUJ0t5CMPVq5yw5gYmg98ywo&_nc_zt=23&_nc_ht=scontent-gru1-1.xx&_nc_gid=t68Vd9NAX8flbn1RwfJ8ew&oh=00_AfjcC-T0sWIZOX3LGgK_1nUHil70bmJ7A-LSH3k-rf_x0w&oe=692B13E0';
-// BBC: using a generic placeholder if no direct image provided; replace with official logo URL if available.
-const BBC_LOGO = 'https://scontent-gru1-1.xx.fbcdn.net/v/t39.30808-6/245330608_5300122836669539_378388837082703204_n.png?_nc_cat=1&ccb=1-7&_nc_sid=6ee11a&_nc_eui2=AeHpC0IKSJFwO8BFrE80sZoSE-7h2BzhLYUT7uHYHOEthWshjI-fNm2GeCA-V5gnFWTIA-B9WD1Qe4uAKTHLqatN&_nc_ohc=GN2mcP9WQ2MQ7kNvwFQaoVy&_nc_oc=AdmZ0Ez4FswTWeU_G7NtMiE9nLqmdOg2B4FP3YdFu_RhcDA4OhVSKqE5OnjXP9Xd2pozIr3wmLwS6VYra4YJlYvE&_nc_zt=23&_nc_ht=scontent-gru1-1.xx&_nc_gid=VSEe986IQF1ssImK23nWgQ&oh=00_AfhjuMqKv3Wv601TcXLSQTAamBrLb_CmtGf_QaiNmNmohw&oe=692AE18F';
-
-const newsSources: NewsSource[] = [
-  // Crypto News Sources
+const newsSourcesData: NewsSource[] = [
   {
     name: 'Cointelegraph',
     description: 'Leading crypto news platform',
@@ -32,7 +26,7 @@ const newsSources: NewsSource[] = [
     language: 'en',
     icon: 'bitcoinsign.circle.fill',
     color: '#FF6B35',
-    logo: COINTELEGRAPH_LOGO
+    logoIndex: 0
   },
   {
     name: 'Cointelegraph Brasil',
@@ -42,7 +36,7 @@ const newsSources: NewsSource[] = [
     language: 'pt',
     icon: 'bitcoinsign.circle.fill',
     color: '#FF6B35',
-    logo: COINTELEGRAPH_LOGO
+    logoIndex: 0
   },
   {
     name: 'Cointelegraph Español',
@@ -52,7 +46,7 @@ const newsSources: NewsSource[] = [
     language: 'es',
     icon: 'bitcoinsign.circle.fill',
     color: '#FF6B35',
-    logo: COINTELEGRAPH_LOGO
+    logoIndex: 0
   },
   {
     name: 'BeInCrypto',
@@ -62,7 +56,7 @@ const newsSources: NewsSource[] = [
     language: 'en',
     icon: 'diamond.fill',
     color: '#00D4FF',
-    logo: BEINCRYPTO_LOGO
+    logoIndex: 1
   },
   {
     name: 'BeInCrypto Brasil',
@@ -72,7 +66,7 @@ const newsSources: NewsSource[] = [
     language: 'pt',
     icon: 'diamond.fill',
     color: '#00D4FF',
-    logo: BEINCRYPTO_LOGO
+    logoIndex: 1
   },
   {
     name: 'BeInCrypto Español',
@@ -82,9 +76,8 @@ const newsSources: NewsSource[] = [
     language: 'es',
     icon: 'diamond.fill',
     color: '#00D4FF',
-    logo: BEINCRYPTO_LOGO
+    logoIndex: 1
   },
-  // BBC News Sources
   {
     name: 'BBC Business',
     description: 'Business and finance news',
@@ -93,7 +86,7 @@ const newsSources: NewsSource[] = [
     language: 'en',
     icon: 'building.2.fill',
     color: '#BB1919',
-    logo: BBC_LOGO
+    logoIndex: 2
   },
   {
     name: 'BBC Mundo Economía',
@@ -103,7 +96,7 @@ const newsSources: NewsSource[] = [
     language: 'es',
     icon: 'building.2.fill',
     color: '#BB1919',
-    logo: BBC_LOGO
+    logoIndex: 2
   },
   {
     name: 'BBC Brasil Economia',
@@ -113,23 +106,24 @@ const newsSources: NewsSource[] = [
     language: 'pt',
     icon: 'building.2.fill',
     color: '#BB1919',
-    logo: BBC_LOGO
+    logoIndex: 2
   }
 ];
 
 interface NewsCardProps {
   source: NewsSource;
   onPress: () => void;
+  logoAsset?: any;
 }
 
-function NewsCard({ source, onPress }: NewsCardProps) {
+function NewsCard({ source, onPress, logoAsset }: NewsCardProps) {
   return (
     <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
       <View style={styles.cardHeader}>
-        {source.logo ? (
+        {logoAsset ? (
           <Image
             accessibilityLabel={`${source.name} logo`}
-            source={{ uri: source.logo }}
+            source={logoAsset}
             style={styles.logoImage}
             resizeMode="contain"
           />
@@ -162,6 +156,11 @@ function NewsCard({ source, onPress }: NewsCardProps) {
 
 export default function NoticiasScreen() {
   const { t } = useTranslation();
+  const [assets, error] = useAssets([
+    require('@/assets/images/cointelegraph.jpg'),
+    require('@/assets/images/beincrypto.png'),
+    require('@/assets/images/bbcnews.jpg'),
+  ]);
   
   const openURL = async (url: string, sourceName: string) => {
     try {
@@ -184,8 +183,15 @@ export default function NoticiasScreen() {
     }
   };
   
-  const cryptoSources = newsSources.filter(source => source.category === 'crypto');
-  const generalSources = newsSources.filter(source => source.category === 'general');
+  const generalSources = newsSourcesData.filter(source => source.category === 'general');
+  const cryptoSources = newsSourcesData.filter(source => source.category === 'crypto');
+  if (!assets) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={AppTheme.colors.primary} />
+      </View>
+    );
+  }
   
   return (
     <ScrollView 
@@ -207,6 +213,7 @@ export default function NoticiasScreen() {
           <NewsCard
             key={index}
             source={source}
+            logoAsset={source.logoIndex !== undefined ? assets[source.logoIndex] : undefined}
             onPress={() => openURL(source.url, source.name)}
           />
         ))}
@@ -219,6 +226,7 @@ export default function NoticiasScreen() {
           <NewsCard
             key={index}
             source={source}
+            logoAsset={source.logoIndex !== undefined ? assets[source.logoIndex] : undefined}
             onPress={() => openURL(source.url, source.name)}
           />
         ))}

@@ -331,7 +331,7 @@ export default function TokensScreen() {
             onPress={() => item.id && onTokenSelect(item.id)}
           >
             <View style={{ flex: 1 }}>
-              <Text style={styles.tokenText}>{item.symbol || item.name || item.address}</Text>
+              <Text style={styles.tokenText}>{item.symbol?.toUpperCase() || item.name || item.address}</Text>
               <Text style={styles.tokenSub}>{item.value ? `$${Number(item.value).toFixed(2)}` : ''}</Text>
             </View>
             <TouchableOpacity 
@@ -466,7 +466,7 @@ export default function TokensScreen() {
                 alerts.map((item, index) => (
                   <View key={index} style={styles.alertRow}>
                     <View style={{flex: 1}}>
-                      <Text style={styles.alertToken}>{item.token_symbol || item.token?.symbol || 'Unknown'}</Text>
+                      <Text style={styles.alertToken}>{item.token_symbol?.toUpperCase() || item.token?.symbol?.toUpperCase() || 'Unknown'}</Text>
                       <Text style={styles.alertDetail}>
                         {item.alert_type === 'price_above' ? 'Acima de' : 'Abaixo de'} ${item.price_threshold ?? 'N/A'}
                       </Text>
@@ -748,7 +748,7 @@ const styles = StyleSheet.create({
     minWidth: 80
   },
   removeBtnText: { 
-    color: AppTheme.colors.card, 
+    color: AppTheme.colors.textDark, 
     ...AppTheme.typography.body,
     fontWeight: '600' 
   },
