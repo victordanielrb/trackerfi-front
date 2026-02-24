@@ -11,10 +11,15 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../../contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 import { useWalletTracking } from '../../hooks/useWalletTracking';
+import { useExchangeManagement, ExchangeResponse } from '../../hooks/useExchangeManagement';
 import { useTranslation } from 'react-i18next';
 import AddTrackedWalletForm from '../../components/AddTrackedWalletForm';
+import AddExchangeForm from '../../components/AddExchangeForm';
+import EditExchangeForm from '../../components/EditExchangeForm';
 import ConfirmDialog from '../../components/ConfirmDialog';
+import { AppTheme } from '@/constants/theme';
 
 // Web-safe alert function
 const showAlert = (title: string, message: string) => {
@@ -26,7 +31,16 @@ const showAlert = (title: string, message: string) => {
 };
 
 export default function WalletsScreen() {
+  const [activeTab, setActiveTab] = useState<'wallets' | 'exchanges'>('wallets');
   const [modalVisible, setModalVisible] = useState(false);
+  const [exchangeModalVisible, setExchangeModalVisible] = useState(false);
+  const [editExchangeModal, setEditExchangeModal] = useState<{
+    visible: boolean;
+    exchange: ExchangeResponse | null;
+  }>({
+    visible: false,
+    exchange: null,
+  });
   const [confirmDialog, setConfirmDialog] = useState<{
     visible: boolean;
     address: string;
@@ -36,18 +50,38 @@ export default function WalletsScreen() {
     address: '',
     chain: ''
   });
+  const [exchangeConfirmDialog, setExchangeConfirmDialog] = useState<{
+    visible: boolean;
+    exchangeId: string;
+    exchangeName: string;
+  }>({
+    visible: false,
+    exchangeId: '',
+    exchangeName: ''
+  });
   
   const { isAuthenticated, logout } = useAuth();
   const router = useRouter();
   
   const {
     trackedWallets,
-    loading,
-    error,
+    loading: walletsLoading,
+    error: walletsError,
     addTrackedWallet,
     removeTrackedWallet,
-    refetch
+    refetch: refetchWallets
   } = useWalletTracking();
+
+  const {
+    exchanges,
+    loading: exchangesLoading,
+    error: exchangesError,
+    addExchange,
+    updateExchange,
+    removeExchange,
+    refetch: refetchExchanges
+  } = useExchangeManagement();
+
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -69,6 +103,27 @@ export default function WalletsScreen() {
     }
   };
 
+  const handleAddExchange = async (name: string, apiKey: string, apiSecret: string) => {
+    try {
+      await addExchange(name, apiKey, apiSecret);
+      setExchangeModalVisible(false);
+      // addExchange already calls fetchExchanges internally, no need for manual refetch
+    } catch (error: any) {
+      throw error; // Let AddExchangeForm handle the error display
+    }
+  };
+
+  const handleUpdateExchange = async (exchangeId: string, apiKey?: string, apiSecret?: string) => {
+    try {
+      await updateExchange(exchangeId, apiKey, apiSecret);
+      setEditExchangeModal({ visible: false, exchange: null });
+      showAlert(t('success'), t('exchange_updated'));
+      // updateExchange already calls fetchExchanges internally, no need for manual refetch
+    } catch (error: any) {
+      showAlert(t('error'), error.message || t('failed_update_exchange'));
+    }
+  };
+
   const handleRemoveWallet = async () => {
     try {
       await removeTrackedWallet(confirmDialog.address, confirmDialog.chain);
@@ -79,11 +134,37 @@ export default function WalletsScreen() {
     }
   };
 
+  const handleRemoveExchange = async () => {
+    try {
+      await removeExchange(exchangeConfirmDialog.exchangeId);
+      setExchangeConfirmDialog({ visible: false, exchangeId: '', exchangeName: '' });
+      showAlert(t('success'), t('exchange_removed'));
+      // removeExchange already calls fetchExchanges internally, no need for manual refetch
+    } catch (error: any) {
+      showAlert(t('error'), error.message || t('failed_remove_exchange'));
+    }
+  };
+
   const showDeleteConfirmation = (address: string, chain: string) => {
     setConfirmDialog({
       visible: true,
       address,
       chain
+    });
+  };
+
+  const showExchangeDeleteConfirmation = (exchangeId: string, exchangeName: string) => {
+    setExchangeConfirmDialog({
+      visible: true,
+      exchangeId,
+      exchangeName
+    });
+  };
+
+  const showEditExchange = (exchange: ExchangeResponse) => {
+    setEditExchangeModal({
+      visible: true,
+      exchange
     });
   };
 
@@ -111,6 +192,40 @@ export default function WalletsScreen() {
     </View>
   );
 
+  const renderExchange = ({ item }: { item: ExchangeResponse }) => (
+    <View style={styles.exchangeCard}>
+      <View style={styles.exchangeHeader}>
+        <View style={[styles.exchangeBadge, { backgroundColor: getExchangeColor(item.name) }]}>
+          <Text style={styles.exchangeText}>
+            {item.name.charAt(0).toUpperCase() + item.name.slice(1)}
+          </Text>
+        </View>
+        <View style={styles.exchangeActions}>
+          <TouchableOpacity
+            onPress={() => showEditExchange(item)}
+            style={styles.editButton}
+          >
+            <Text style={styles.editButtonText}>{t('edit')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => showExchangeDeleteConfirmation(item.id, item.name)}
+            style={styles.deleteButton}
+          >
+            <Text style={styles.deleteButtonText}>{t('remove')}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      
+      <Text style={styles.apiKeyText}>
+        {t('api_key')}: {item.api_key}
+      </Text>
+      
+      <Text style={styles.exchangeNote}>
+        {t('exchange_security_note')}
+      </Text>
+    </View>
+  );
+
   const getChainColor = (chain: string) => {
     switch (chain) {
       case 'EVM': return '#627EEA';
@@ -120,63 +235,131 @@ export default function WalletsScreen() {
     }
   };
 
-  if (loading && trackedWallets.length === 0) {
+  const getExchangeColor = (exchange: string) => {
+    switch (exchange.toLowerCase()) {
+      case 'binance': return '#F3BA2F';
+      case 'coinbase': return '#0052FF';
+      case 'kraken': return '#5741D9';
+      case 'kucoin': return '#24AE8F';
+      case 'bybit': return '#F7A600';
+      case 'okx': return '#000000';
+      case 'huobi': return '#2FB5EB';
+      case 'mexc': return '#0A84FF';
+      case 'gate': return '#007BFF';
+      default: return '#666';
+    }
+  };
+
+  if ((activeTab === 'wallets' && walletsLoading && trackedWallets.length === 0) || 
+      (activeTab === 'exchanges' && exchangesLoading && exchanges.length === 0)) {
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>{t('loading_tracked_wallets')}</Text>
+        <Text style={styles.loadingText}>
+          {activeTab === 'wallets' ? t('loading_tracked_wallets') : t('loading_exchanges')}
+        </Text>
       </View>
     );
   }
 
+  const currentLoading = activeTab === 'wallets' ? walletsLoading : exchangesLoading;
+  const currentError = activeTab === 'wallets' ? walletsError : exchangesError;
+  const currentRefetch = activeTab === 'wallets' ? refetchWallets : refetchExchanges;
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-  <Text style={styles.title}>{t('manage_wallets')}</Text>
-        <View style={styles.headerButtons}>
+        <View style={styles.headerTop}>
+          <Text style={styles.headerTitle}>{t('wallets_exchanges')}</Text>
+        </View>
+        
+        {/* Tab Buttons */}
+        <View style={styles.tabContainer}>
           <TouchableOpacity
-            style={styles.portfolioButton}
-            onPress={() => router.push('/portfolio')}
+            style={[styles.tabButton, activeTab === 'wallets' && styles.activeTabButton]}
+            onPress={() => setActiveTab('wallets')}
           >
-            <Text style={styles.portfolioButtonText}>📊 {t('view_portfolio')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="wallet-outline" size={16} color={activeTab === 'wallets' ? '#fff' : AppTheme.colors.textMuted} />
+              <Text style={[styles.tabButtonText, activeTab === 'wallets' && styles.activeTabButtonText]}>
+                {t('wallets')}
+              </Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.addButton}
-            onPress={() => setModalVisible(true)}
+            style={[styles.tabButton, activeTab === 'exchanges' && styles.activeTabButton]}
+            onPress={() => setActiveTab('exchanges')}
           >
-            <Text style={styles.addButtonText}>+ {t('track_wallet')}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <Ionicons name="business-outline" size={16} color={activeTab === 'exchanges' ? '#fff' : AppTheme.colors.textMuted} />
+              <Text style={[styles.tabButtonText, activeTab === 'exchanges' && styles.activeTabButtonText]}>
+                {t('exchanges')}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.headerButtons}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => activeTab === 'wallets' ? setModalVisible(true) : setExchangeModalVisible(true)}
+          >
+            <Text style={styles.addButtonText}>
+              + {activeTab === 'wallets' ? t('track_wallet') : t('add_exchange')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      {error && (
+      {currentError && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryButton} onPress={refetch}>
+          <Text style={styles.errorText}>{currentError}</Text>
+          <TouchableOpacity style={styles.retryButton} onPress={currentRefetch}>
             <Text style={styles.retryButtonText}>{t('retry')}</Text>
           </TouchableOpacity>
         </View>
       )}
 
-      {trackedWallets.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>{t('no_wallets_tracked')}</Text>
-          <Text style={styles.emptySubtext}>
-            {t('track_any_wallet_to_monitor')}
-          </Text>
-        </View>
-      ) : (
-        <>
+      {activeTab === 'wallets' ? (
+        // Wallets Tab Content
+        trackedWallets.length === 0 ? (
+          <View style={styles.centerContainer}>
+            <Text style={styles.emptyText}>{t('no_wallets_tracked')}</Text>
+            <Text style={styles.emptySubtext}>
+              {t('track_any_wallet_to_monitor')}
+            </Text>
+          </View>
+        ) : (
           <FlatList
             data={trackedWallets}
             renderItem={renderWallet}
             keyExtractor={(item) => `${item.address}-${item.chain}`}
             refreshControl={
-              <RefreshControl refreshing={loading} onRefresh={refetch} />
+              <RefreshControl refreshing={currentLoading} onRefresh={currentRefetch} />
             }
             contentContainerStyle={styles.listContainer}
           />
-        </>
+        )
+      ) : (
+        // Exchanges Tab Content
+        exchanges.length === 0 ? (
+          <View style={styles.centerContainer}>
+            <Text style={styles.emptyText}>{t('no_exchanges_added')}</Text>
+            <Text style={styles.emptySubtext}>
+              {t('add_exchange_to_manage_apis')}
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={exchanges}
+            renderItem={renderExchange}
+            keyExtractor={(item) => item.id}
+            refreshControl={
+              <RefreshControl refreshing={currentLoading} onRefresh={currentRefetch} />
+            }
+            contentContainerStyle={styles.listContainer}
+          />
+        )
       )}
 
       {/* Add Wallet Modal */}
@@ -194,7 +377,40 @@ export default function WalletsScreen() {
         </View>
       </Modal>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Add Exchange Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={exchangeModalVisible}
+        onRequestClose={() => setExchangeModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <AddExchangeForm
+            onAddExchange={handleAddExchange}
+            onCancel={() => setExchangeModalVisible(false)}
+          />
+        </View>
+      </Modal>
+
+      {/* Edit Exchange Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editExchangeModal.visible}
+        onRequestClose={() => setEditExchangeModal({ visible: false, exchange: null })}
+      >
+        <View style={styles.modalContainer}>
+          {editExchangeModal.exchange && (
+            <EditExchangeForm
+              exchange={editExchangeModal.exchange}
+              onUpdateExchange={handleUpdateExchange}
+              onCancel={() => setEditExchangeModal({ visible: false, exchange: null })}
+            />
+          )}
+        </View>
+      </Modal>
+
+      {/* Delete Wallet Confirmation Dialog */}
       <ConfirmDialog
         visible={confirmDialog.visible}
         title={t('remove_tracked_wallet')}
@@ -204,6 +420,17 @@ export default function WalletsScreen() {
         onConfirm={handleRemoveWallet}
         onCancel={() => setConfirmDialog({ visible: false, address: '', chain: '' })}
       />
+
+      {/* Delete Exchange Confirmation Dialog */}
+      <ConfirmDialog
+        visible={exchangeConfirmDialog.visible}
+        title={t('remove_exchange')}
+        message={t('remove_exchange_message', { exchange: exchangeConfirmDialog.exchangeName })}
+        confirmText={t('remove')}
+        cancelText={t('cancel')}
+        onConfirm={handleRemoveExchange}
+        onCancel={() => setExchangeConfirmDialog({ visible: false, exchangeId: '', exchangeName: '' })}
+      />
     </View>
   );
 }
@@ -211,149 +438,231 @@ export default function WalletsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
   },
   centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   header: {
     flexDirection: 'column',
-   
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingTop: 60,
+    paddingBottom: AppTheme.spacing.lg,
+    backgroundColor: AppTheme.colors.card,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
+  },
+  headerTop: {
+    width: '100%',
+    marginBottom: AppTheme.spacing.md,
+  },
+  headerTitle: {
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  headerSubtitle: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+  },
+  title: {
+    margin: 10,
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: AppTheme.spacing.xs,
+    marginVertical: 10,
+  },
+  tabButton: {
+    paddingHorizontal: AppTheme.spacing.lg,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: 6,
+    marginHorizontal: 2,
+  },
+  activeTabButton: {
+    backgroundColor: AppTheme.colors.primary,
+  },
+  tabButtonText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: AppTheme.colors.textMuted,
+  },
+  activeTabButtonText: {
+    color: '#FFFFFF',
   },
   headerButtons: {
-    marginVertical:5,
+    marginVertical: 5,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
   portfolioButton: {
-    backgroundColor: '#34C759',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.success,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   portfolioButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
-    fontSize: 14,
-  },
-  title: {
-    margin:10,
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#333',
+    ...AppTheme.typography.body,
   },
   addButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   addButtonText: {
-    color: '#fff',
+    color: AppTheme.colors.card,
     fontWeight: '600',
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: AppTheme.spacing.sm,
   },
   errorContainer: {
-    backgroundColor: '#ffebee',
-    padding: 16,
-    margin: 16,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.dangerLight,
+    padding: AppTheme.spacing.md,
+    margin: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.sm,
     borderWidth: 1,
-    borderColor: '#ffcdd2',
+    borderColor: AppTheme.colors.danger,
   },
   errorText: {
-    color: '#c62828',
-    fontSize: 14,
-    marginBottom: 8,
+    color: AppTheme.colors.danger,
+    ...AppTheme.typography.body,
+    marginBottom: AppTheme.spacing.sm,
   },
   retryButton: {
-    backgroundColor: '#f44336',
-    paddingHorizontal: 12,
+    backgroundColor: AppTheme.colors.danger,
+    paddingHorizontal: AppTheme.spacing.md,
     paddingVertical: 6,
-    borderRadius: 4,
+    borderRadius: AppTheme.borderRadius.xs,
     alignSelf: 'flex-start',
   },
   retryButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   listContainer: {
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   walletCard: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   walletHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   chainBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
   },
   chainText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   deleteButton: {
-    backgroundColor: '#ff3b30',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    backgroundColor: AppTheme.colors.danger,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
     borderRadius: 6,
   },
   deleteButtonText: {
-    color: '#fff',
-    fontSize: 12,
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
     fontWeight: '600',
   },
   addressText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontFamily: 'monospace',
-    color: '#333',
-    marginBottom: 8,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
   },
   walletNote: {
-    fontSize: 12,
-    color: '#666',
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
+    fontStyle: 'italic',
+  },
+  // Exchange card styles
+  exchangeCard: {
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
+  },
+  exchangeHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: AppTheme.spacing.md,
+  },
+  exchangeBadge: {
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
+  },
+  exchangeText: {
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
+    fontWeight: '600',
+  },
+  exchangeActions: {
+    flexDirection: 'row',
+    gap: AppTheme.spacing.sm,
+  },
+  editButton: {
+    backgroundColor: AppTheme.colors.warning,
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: 6,
+  },
+  editButtonText: {
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.small,
+    fontWeight: '600',
+  },
+  apiKeyText: {
+    ...AppTheme.typography.body,
+    fontFamily: 'monospace',
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.sm,
+  },
+  exchangeNote: {
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
     fontStyle: 'italic',
   },
   modalContainer: {

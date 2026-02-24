@@ -1,5 +1,5 @@
 export const API_CONFIG = {
-  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'http://192.168.1.66:3000',
+  BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL ,
   ENDPOINTS: {
     AUTH: {
       LOGIN: '/auth/login',
@@ -14,7 +14,9 @@ export const API_CONFIG = {
     },
     TRACKING: {
       WALLETS: '/api/tracking/wallets',
-      TOKENS: '/api/tracking/tokens'
+      TOKENS: '/api/tracking/tokens',
+      SNAPSHOTS: '/api/tracking/snapshots',
+      ALERTS: '/api/tracking/alerts'
     },
     USERS: {
       BASE: '/api/users',

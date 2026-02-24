@@ -1,6 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { getApiUrl } from '../constants/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useSettings } from '../contexts/SettingsContext';
 
 export interface GlobalTotalData {
   // shape is unknown; keep flexible
@@ -57,19 +59,65 @@ export const useGlobalData = (opts?: { autoRefreshMs?: number }) => {
     const [tot, pr] = await Promise.all([fetchTotalData(), fetchPrices()]);
     return { totalData: tot, prices: pr };
   }, [fetchTotalData, fetchPrices]);
+  // prevent duplicate simultaneous requests
+  const isFetchingRef = useRef(false);
 
+  // Use auth + settings to control when to fetch
+  const { isAuthenticated } = useAuth();
+  const { language } = useSettings();
+
+  // Trigger a fetch when the user becomes authenticated
   useEffect(() => {
-    // initial load
-    refreshAll();
+    if (!isAuthenticated) return;
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    (async () => {
+      try {
+        await refreshAll();
+      } catch (e) {
+        // ignore - errors are handled in fetch helpers
+      } finally {
+        isFetchingRef.current = false;
+      }
+    })();
+  }, [isAuthenticated, refreshAll]);
 
-    // optional auto-refresh
-    const ms = opts?.autoRefreshMs ?? 5 * 60 * 1000; // default 5 minutes
-    const interval = setInterval(() => {
-      refreshAll();
-    }, ms);
+  // Fetch when language changes (user requested this behaviour). This allows
+  // language switch to refresh any language-sensitive global data even when
+  // the user is not logged in.
+  useEffect(() => {
+    // if a fetch is already in progress, skip
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+    (async () => {
+      try {
+        await refreshAll();
+      } catch (e) {
+        // ignore
+      } finally {
+        isFetchingRef.current = false;
+      }
+    })();
+    // intentionally only depend on language so currency changes won't trigger
+    // this effect
+  }, [language, refreshAll]);
 
-    return () => clearInterval(interval);
-  }, [refreshAll, opts]);
+  // optional auto-refresh - only if explicitly requested. This interval should
+  // run while the hook is mounted (and respects isAuthenticated guard inside
+  // refreshAll if desired by consumers). We keep this separate from the
+  // auth/language triggers above.
+  useEffect(() => {
+    const ms = opts?.autoRefreshMs;
+    if (ms && ms > 0) {
+      const interval = setInterval(() => {
+        if (isFetchingRef.current) return;
+        isFetchingRef.current = true;
+        refreshAll().finally(() => { isFetchingRef.current = false; });
+      }, ms);
+      return () => clearInterval(interval);
+    }
+    return;
+  }, [opts?.autoRefreshMs, refreshAll]);
 
   return {
     totalData,

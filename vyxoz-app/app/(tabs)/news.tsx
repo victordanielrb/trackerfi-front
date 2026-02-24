@@ -1,0 +1,361 @@
+import React from 'react';
+import { StyleSheet, View, Text, TouchableOpacity, ScrollView, Linking, Alert, Image, ActivityIndicator } from 'react-native';
+import { useTranslation } from 'react-i18next';
+import { useAssets } from 'expo-asset';
+import { Ionicons } from '@expo/vector-icons';
+import { IconSymbol } from '@/components/ui/icon-symbol';
+import { AppTheme } from '@/constants/theme';
+
+interface NewsSource {
+  name: string;
+  description: string;
+  url: string;
+  category: 'crypto' | 'general';
+  language: 'pt' | 'en' | 'es';
+  icon: string;
+  color: string;
+  logoIndex?: number;
+}
+
+const newsSourcesData: NewsSource[] = [
+  {
+    name: 'Cointelegraph',
+    description: 'Leading crypto news platform',
+    url: 'https://cointelegraph.com/',
+    category: 'crypto',
+    language: 'en',
+    icon: 'bitcoinsign.circle.fill',
+    color: '#FF6B35',
+    logoIndex: 0
+  },
+  {
+    name: 'Cointelegraph Brasil',
+    description: 'Notícias de crypto em português',
+    url: 'https://br.cointelegraph.com/',
+    category: 'crypto',
+    language: 'pt',
+    icon: 'bitcoinsign.circle.fill',
+    color: '#FF6B35',
+    logoIndex: 0
+  },
+  {
+    name: 'Cointelegraph Español',
+    description: 'Noticias crypto en español',
+    url: 'https://es.cointelegraph.com/',
+    category: 'crypto',
+    language: 'es',
+    icon: 'bitcoinsign.circle.fill',
+    color: '#FF6B35',
+    logoIndex: 0
+  },
+  {
+    name: 'BeInCrypto',
+    description: 'Global crypto news and analysis',
+    url: 'https://beincrypto.com/',
+    category: 'crypto',
+    language: 'en',
+    icon: 'diamond.fill',
+    color: '#00D4FF',
+    logoIndex: 1
+  },
+  {
+    name: 'BeInCrypto Brasil',
+    description: 'Análises e notícias crypto',
+    url: 'https://br.beincrypto.com/',
+    category: 'crypto',
+    language: 'pt',
+    icon: 'diamond.fill',
+    color: '#00D4FF',
+    logoIndex: 1
+  },
+  {
+    name: 'BeInCrypto Español',
+    description: 'Noticias y análisis crypto',
+    url: 'https://es.beincrypto.com/',
+    category: 'crypto',
+    language: 'es',
+    icon: 'diamond.fill',
+    color: '#00D4FF',
+    logoIndex: 1
+  },
+  {
+    name: 'BBC Business',
+    description: 'Business and finance news',
+    url: 'https://www.bbc.com/news/topics/cyd7z4rvdm3t',
+    category: 'general',
+    language: 'en',
+    icon: 'building.2.fill',
+    color: '#BB1919',
+    logoIndex: 2
+  },
+  {
+    name: 'BBC Mundo Economía',
+    description: 'Noticias económicas en español',
+    url: 'https://www.bbc.com/mundo/topics/c1y3ykyvq31t',
+    category: 'general',
+    language: 'es',
+    icon: 'building.2.fill',
+    color: '#BB1919',
+    logoIndex: 2
+  },
+  {
+    name: 'BBC Brasil Economia',
+    description: 'Notícias econômicas em português',
+    url: 'https://www.bbc.com/portuguese/topics/c6x7dxredp9t',
+    category: 'general',
+    language: 'pt',
+    icon: 'building.2.fill',
+    color: '#BB1919',
+    logoIndex: 2
+  }
+];
+
+interface NewsCardProps {
+  source: NewsSource;
+  onPress: () => void;
+  logoAsset?: any;
+}
+
+function NewsCard({ source, onPress, logoAsset }: NewsCardProps) {
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.75}>
+      <View style={styles.cardHeader}>
+        {logoAsset ? (
+          <Image
+            accessibilityLabel={`${source.name} logo`}
+            source={logoAsset}
+            style={styles.logoImage}
+            resizeMode="contain"
+          />
+        ) : (
+          <View style={[styles.iconContainer, { backgroundColor: source.color }]}>
+            <IconSymbol name={source.icon as any} size={24} color="white" />
+          </View>
+        )}
+        <View style={styles.cardInfo}>
+          <Text style={styles.cardTitle}>{source.name}</Text>
+          <Text style={styles.cardDescription}>{source.description}</Text>
+        </View>
+      </View>
+      <View style={styles.cardFooter}>
+        <View style={[styles.categoryBadge, { backgroundColor: source.category === 'crypto' ? '#FF6B3520' : '#BB191920' }]}>            
+          <Text style={[styles.categoryText, { color: source.category === 'crypto' ? '#FF6B35' : '#BB1919' }]}>
+            {source.category === 'crypto' ? 'CRYPTO' : 'ECONOMY'}
+          </Text>
+        </View>
+        <View style={styles.languageContainer}>
+          <Text style={styles.languageText}>{source.language.toUpperCase()}</Text>
+        </View>
+      </View>
+      <View style={styles.arrowContainer}>
+        <IconSymbol name="chevron.right" size={20} color={source.color} />
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+export default function NoticiasScreen() {
+  const { t } = useTranslation();
+  const [assets, error] = useAssets([
+    require('@/assets/images/cointelegraph.jpg'),
+    require('@/assets/images/beincrypto.png'),
+    require('@/assets/images/bbcnews.jpg'),
+  ]);
+  
+  const openURL = async (url: string, sourceName: string) => {
+    try {
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        Alert.alert(
+          t('news.error'),
+          t('news.cannotOpen', { source: sourceName }),
+          [{ text: t('news.ok'), style: 'default' }]
+        );
+      }
+    } catch (error) {
+      Alert.alert(
+        t('news.error'),
+        t('news.failedToOpen', { source: sourceName }),
+        [{ text: t('news.ok'), style: 'default' }]
+      );
+    }
+  };
+  
+  const generalSources = newsSourcesData.filter(source => source.category === 'general');
+  const cryptoSources = newsSourcesData.filter(source => source.category === 'crypto');
+  if (!assets) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={AppTheme.colors.primary} />
+      </View>
+    );
+  }
+  
+  return (
+    <ScrollView 
+      style={styles.container}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>{t('news.title')}</Text>
+        <Text style={styles.subtitle}>
+          {t('news.subtitle')}
+        </Text>
+      </View>
+      
+      {/* Crypto News Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('news.cryptoNews')}</Text>
+        {cryptoSources.map((source, index) => (
+          <NewsCard
+            key={index}
+            source={source}
+            logoAsset={source.logoIndex !== undefined ? assets[source.logoIndex] : undefined}
+            onPress={() => openURL(source.url, source.name)}
+          />
+        ))}
+      </View>
+      
+      {/* General Economy Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>{t('news.generalEconomy')}</Text>
+        {generalSources.map((source, index) => (
+          <NewsCard
+            key={index}
+            source={source}
+            logoAsset={source.logoIndex !== undefined ? assets[source.logoIndex] : undefined}
+            onPress={() => openURL(source.url, source.name)}
+          />
+        ))}
+      </View>
+      
+      {/* Info Footer */}
+      <View style={styles.infoFooter}>
+        <Text style={styles.infoText}>
+          {t('news.tapToAccess')}
+        </Text>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: AppTheme.colors.background,
+  },
+  header: {
+    backgroundColor: AppTheme.colors.card,
+    padding: AppTheme.spacing.lg,
+    paddingTop: 60,
+  },
+  title: {
+    ...AppTheme.typography.title,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  subtitle: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+  },
+  section: {
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
+    padding: AppTheme.spacing.lg,
+    borderRadius: AppTheme.borderRadius.lg,
+    ...AppTheme.shadows.card,
+  },
+  sectionTitle: {
+    ...AppTheme.typography.sectionTitle,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.md,
+  },
+  card: {
+    backgroundColor: AppTheme.colors.cardInner,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    marginBottom: AppTheme.spacing.md,
+    borderWidth: 1,
+    borderColor: AppTheme.colors.border,
+    position: 'relative',
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: AppTheme.spacing.md,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: AppTheme.spacing.md,
+  },
+  logoImage: {
+    width: 54,
+    height: 54,
+    borderRadius: AppTheme.borderRadius.md,
+    marginRight: AppTheme.spacing.md,
+    backgroundColor: AppTheme.colors.card,
+  },
+  cardInfo: {
+    flex: 1,
+  },
+  cardTitle: {
+    ...AppTheme.typography.label,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
+  },
+  cardDescription: {
+    ...AppTheme.typography.small,
+    color: AppTheme.colors.textMuted,
+  },
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  categoryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: AppTheme.borderRadius.md,
+  },
+  categoryText: {
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  languageContainer: {
+    backgroundColor: AppTheme.colors.border,
+    paddingHorizontal: AppTheme.spacing.sm,
+    paddingVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.sm,
+  },
+  languageText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: AppTheme.colors.textMuted,
+  },
+  arrowContainer: {
+    position: 'absolute',
+    right: AppTheme.spacing.md,
+    top: '50%',
+    transform: [{ translateY: -10 }],
+  },
+  infoFooter: {
+    backgroundColor: AppTheme.colors.card,
+    margin: AppTheme.spacing.md,
+    marginTop: 0,
+    padding: AppTheme.spacing.md,
+    borderRadius: AppTheme.borderRadius.md,
+    alignItems: 'center',
+  },
+  infoText: {
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
+    textAlign: 'center',
+  },
+});
