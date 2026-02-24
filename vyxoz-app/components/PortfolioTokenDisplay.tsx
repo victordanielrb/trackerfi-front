@@ -8,7 +8,11 @@ import {
   ActivityIndicator,
   RefreshControl
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { TrackedWalletToken } from '../hooks/useWalletTracking';
+import { useTranslation } from 'react-i18next';
+import { useSettings } from '../contexts/SettingsContext';
+import { AppTheme } from '@/constants/theme';
 
 interface PortfolioTokenDisplayProps {
   tokens: TrackedWalletToken[];
@@ -31,6 +35,25 @@ export default function PortfolioTokenDisplay({
 }: PortfolioTokenDisplayProps) {
 
   const [sortBy, setSortBy] = useState<SortOption>('value');
+  const { t } = useTranslation();
+  const { currency, prices } = useSettings();
+
+  const currencySymbol = (() => {
+    switch (currency) {
+      case 'BRL': return 'R$';
+      case 'EUR': return '€';
+      default: return '$';
+    }
+  })();
+
+  const convert = (usdValue?: number | string) => {
+    const v = typeof usdValue === 'string' ? parseFloat(usdValue) : (usdValue || 0);
+    if (!v) return 0;
+    if (currency === 'USD') return v;
+    if (currency === 'BRL' && prices?.brl) return v * prices.brl;
+    if (currency === 'EUR' && prices?.eur) return v * prices.eur;
+    return v;
+  };
 
   const getChainColor = (chain: string) => {
     const chainUpper = chain?.toUpperCase();
@@ -111,14 +134,13 @@ export default function PortfolioTokenDisplay({
 
   const renderSortButtons = () => (
     <View style={styles.sortContainer}>
-      <Text style={styles.sortTitle}>Sort by:</Text>
+      <Text style={styles.sortTitle}>{t('sort_by')}</Text>
       <View style={styles.sortButtons}>
         {[
-          { key: 'value', short: 'Holdings' },
-          { key: 'balance', short: 'Quantity' },
-          { key: 'performance', short: '24h%' },
-          { key: 'alphabetical', short: 'Name' },
-          { key: 'chain', short: 'Chain' }
+          { key: 'value', short: t('holdings') },
+          { key: 'balance', short: t('quantity') },
+          { key: 'alphabetical', short: t('name') },
+          { key: 'chain', short: t('chain') }
         ].map((option) => (
           <TouchableOpacity
             key={option.key}
@@ -167,11 +189,11 @@ export default function PortfolioTokenDisplay({
           {/* Token Price */}
           {item.price && !isNaN(parseFloat(item.price.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Price</Text>
+              <Text style={styles.valueLabel}>{t('price')}</Text>
               <Text style={styles.priceText}>
-                ${parseFloat(item.price.toString()).toLocaleString(undefined, {
+                {currencySymbol}{convert(item.price).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 8
+                  maximumFractionDigits: 2
                 })}
               </Text>
             </View>
@@ -180,7 +202,7 @@ export default function PortfolioTokenDisplay({
           {/* Token Quantity */}
           {item.quantity && !isNaN(parseFloat(item.quantity.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Quantity</Text>
+              <Text style={styles.valueLabel}>{t('quantity')}</Text>
               <Text style={styles.balanceText}>
                 {parseFloat(item.quantity.toString()).toLocaleString(undefined, {
                   minimumFractionDigits: 0,
@@ -193,9 +215,9 @@ export default function PortfolioTokenDisplay({
           {/* Holdings (USD Value) */}
           {item.value && !isNaN(parseFloat(item.value.toString())) && (
             <View style={styles.valueBox}>
-              <Text style={styles.valueLabel}>Holdings</Text>
+              <Text style={styles.valueLabel}>{t('holdings')}</Text>
               <Text style={styles.valueText}>
-                ${parseFloat(item.value.toString()).toLocaleString(undefined, {
+                {currencySymbol}{convert(item.value).toLocaleString(undefined, {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2
                 })}
@@ -206,7 +228,7 @@ export default function PortfolioTokenDisplay({
 
         {/* Performance Row */}
         <View style={styles.performanceRow}>
-          <Text style={styles.performanceLabel}>24h Change:</Text>
+          <Text style={styles.performanceLabel}>{t('24h_change')}</Text>
           <Text style={[
             styles.performanceText,
             performance >= 0 ? styles.performancePositive : styles.performanceNegative
@@ -215,15 +237,17 @@ export default function PortfolioTokenDisplay({
           </Text>
         </View>
 
-        {/* Addresses */}
-        <Text style={styles.addressText} numberOfLines={1}>
-          Contract: {item.address || 'N/A'}
-        </Text>
-        
+        {/* Addresses - keep raw strings out of Views by using explicit Text children */}
+        <View style={styles.addressRow}>
+          <Text style={styles.addressLabel}>{t('contract') + ':'}</Text>
+          <Text style={styles.addressValue} numberOfLines={1}>{item.address || 'N/A'}</Text>
+        </View>
+
         {showWalletAddress && (
-          <Text style={styles.addressText} numberOfLines={1}>
-            Wallet: {item.wallet_address || 'N/A'}
-          </Text>
+          <View style={styles.addressRow}>
+            <Text style={styles.addressLabel}>{t('wallet') + ':'}</Text>
+            <Text style={styles.addressValue} numberOfLines={1}>{item.wallet_address || 'N/A'}</Text>
+          </View>
         )}
       </TouchableOpacity>
     );
@@ -232,7 +256,7 @@ export default function PortfolioTokenDisplay({
   const renderBlockchainSection = ({ item }: { item: [string, TrackedWalletToken[]] }) => {
     const [blockchain, blockchainTokens] = item;
     const totalValue = blockchainTokens.reduce((sum, token) => {
-      return sum + (parseFloat(token.value?.toString() || '0'));
+      return sum + convert(parseFloat(token.value?.toString() || '0'));
     }, 0);
     
     return (
@@ -243,13 +267,13 @@ export default function PortfolioTokenDisplay({
             <Text style={styles.blockchainTitle}>{blockchain}</Text>
           </View>
           <View style={styles.blockchainStats}>
-            <Text style={styles.tokenCount}>{blockchainTokens.length} tokens</Text>
-            <Text style={styles.blockchainValue}>
-              ${totalValue.toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-              })}
-            </Text>
+            <Text style={styles.tokenCount}>{blockchainTokens.length} {t('tokens')}</Text>
+              <Text style={styles.blockchainValue}>
+                {currencySymbol}{totalValue.toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2
+                })}
+              </Text>
           </View>
         </View>
         
@@ -268,7 +292,7 @@ export default function PortfolioTokenDisplay({
     return (
       <View style={styles.centerContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
-        <Text style={styles.loadingText}>Loading portfolio...</Text>
+  <Text style={styles.loadingText}>{t('loading_portfolio')}</Text>
       </View>
     );
   }
@@ -276,9 +300,12 @@ export default function PortfolioTokenDisplay({
   if (error) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>⚠️ {error}</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+          <Ionicons name="warning" size={18} color="#FF3B30" />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
         <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>{t('retry')}</Text>
         </TouchableOpacity>
       </View>
     );
@@ -287,8 +314,8 @@ export default function PortfolioTokenDisplay({
   if (tokens.length === 0) {
     return (
       <View style={styles.centerContainer}>
-        <Text style={styles.emptyText}>No tokens found</Text>
-        <Text style={styles.emptySubtext}>Track wallets to see your portfolio</Text>
+        <Text style={styles.emptyText}>{t('no_tokens_found')}</Text>
+        <Text style={styles.emptySubtext}>{t('track_wallets_to_see_portfolio')}</Text>
       </View>
     );
   }
@@ -328,50 +355,49 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.xl,
     minHeight: 200,
   },
   loadingText: {
-    marginTop: 10,
-    fontSize: 16,
-    color: '#666',
+    marginTop: AppTheme.spacing.sm,
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
   },
   errorText: {
-    fontSize: 16,
-    color: '#ff3b30',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.danger,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: AppTheme.spacing.md,
   },
   emptyText: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
   },
   emptySubtext: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-    marginBottom: 16,
+    marginBottom: AppTheme.spacing.md,
   },
   retryButton: {
-    backgroundColor: '#007AFF',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    paddingHorizontal: AppTheme.spacing.xl,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.sm,
   },
   retryText: {
-    color: '#fff',
+    color: '#FFFFFF',
     fontWeight: '600',
   },
 
   // Sort Controls
   sortContainer: {
-    backgroundColor: '#f8f9fa',
-    padding: 16,
+    backgroundColor: AppTheme.colors.cardInner,
+    padding: AppTheme.spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: AppTheme.colors.border,
   },
   sortTitle: {
     fontSize: 14,
@@ -385,57 +411,52 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sortButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: '#fff',
+    paddingHorizontal: AppTheme.spacing.md,
+    paddingVertical: AppTheme.spacing.sm,
+    borderRadius: AppTheme.borderRadius.full,
+    backgroundColor: AppTheme.colors.card,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppTheme.colors.border,
   },
   sortButtonActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
+    borderColor: AppTheme.colors.primary,
   },
   sortButtonText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#333',
+    color: AppTheme.colors.textDark,
   },
   sortButtonTextActive: {
-    color: '#fff',
+    color: '#FFFFFF',
   },
 
   // Token Cards
   tokenCard: {
-    backgroundColor: '#fff',
-    marginHorizontal: 16,
-    marginVertical: 6,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    backgroundColor: AppTheme.colors.card,
+    marginHorizontal: AppTheme.spacing.md,
+    marginVertical: AppTheme.spacing.xs,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   tokenHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: AppTheme.spacing.md,
   },
   tokenNameSection: {
     flex: 1,
   },
   tokenName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
     marginBottom: 2,
   },
   tokenSymbol: {
-    fontSize: 14,
-    color: '#007AFF',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.primary,
     fontWeight: '600',
   },
 
@@ -520,6 +541,24 @@ const styles = StyleSheet.create({
     color: '#666',
     fontFamily: 'monospace',
     marginBottom: 2,
+  },
+  addressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4,
+    paddingHorizontal: 8,
+  },
+  addressLabel: {
+    fontSize: 11,
+    color: '#666',
+    marginRight: 6,
+    fontWeight: '600'
+  },
+  addressValue: {
+    fontSize: 11,
+    color: '#666',
+    fontFamily: 'monospace',
+    flex: 1
   },
 
   // Blockchain Sections

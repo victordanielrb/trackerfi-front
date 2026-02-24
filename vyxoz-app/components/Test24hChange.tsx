@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { API_BASE_URL } from '../constants/api';
 
 interface TestResult {
@@ -148,9 +149,12 @@ export default function Test24hChangeComponent() {
         )}
         
         <View style={[styles.statusBadge, hasIssues ? styles.errorBadge : styles.successBadge]}>
-          <Text style={[styles.statusText, hasIssues ? styles.errorText : styles.successText]}>
-            {hasIssues ? '⚠️ Issues Detected' : '✅ All Tests Passed'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Ionicons name={hasIssues ? 'warning' : 'checkmark-circle'} size={18} color={hasIssues ? '#FF3B30' : '#34C759'} />
+            <Text style={[styles.statusText, hasIssues ? styles.errorText : styles.successText]}>
+              {hasIssues ? 'Issues Detected' : 'All Tests Passed'}
+            </Text>
+          </View>
         </View>
       </View>
     );
@@ -231,7 +235,10 @@ export default function Test24hChangeComponent() {
 
       {error && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorTitle}>❌ Test Failed</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+            <Ionicons name="close-circle" size={18} color="#FF3B30" />
+            <Text style={styles.errorTitle}>Test Failed</Text>
+          </View>
           <Text style={styles.errorMessage}>{error}</Text>
         </View>
       )}

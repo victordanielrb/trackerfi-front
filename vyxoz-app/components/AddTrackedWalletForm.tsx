@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -8,6 +9,7 @@ import {
   Alert,
   Platform,
 } from 'react-native';
+import { AppTheme } from '@/constants/theme';
 
 interface AddTrackedWalletFormProps {
   onAddWallet: (address: string, chain: string) => Promise<void>;
@@ -30,29 +32,23 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
   onAddWallet,
   onCancel,
 }) => {
+  const { t } = useTranslation();
   const [address, setAddress] = useState('');
-  const [chain, setChain] = useState('EVM');
   const [loading, setLoading] = useState(false);
-
-  const chains = [
-    { label: 'Evm', value: 'EVM' },
-    { label: 'Solana', value: 'SOLANA' },
-    { label: 'Sui', value: 'SUI' },
-  ];
 
   const handleAddWallet = async () => {
     if (!address.trim()) {
-      showAlert('Error', 'Please enter a wallet address');
+      showAlert(t('error'), t('please_enter_wallet_address'));
       return;
     }
 
     try {
       setLoading(true);
-      await onAddWallet(address.trim(), chain);
+      await onAddWallet(address.trim(), 'EVM');
       setAddress('');
-      showAlert('Success', 'Wallet added to tracking list');
+      showAlert(t('success'), t('wallet_added_to_tracking'));
     } catch (error: any) {
-      showAlert('Error', error.message || 'Failed to add wallet');
+      showAlert(t('error'), error.message || t('failed_add_wallet'));
     } finally {
       setLoading(false);
     }
@@ -60,46 +56,23 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Add Wallet to Track</Text>
+      <Text style={styles.title}>{t('add_wallet_to_track')}</Text>
       <Text style={styles.subtitle}>
-        Track any wallet address across different blockchains
+        {t('track_any_wallet_across_blockchains')}
       </Text>
 
       <View style={styles.form}>
-        <Text style={styles.label}>Wallet Address</Text>
+        <Text style={styles.label}>{t('wallet_address')}</Text>
         <TextInput
           style={styles.input}
           value={address}
           onChangeText={setAddress}
-          placeholder="Enter wallet address (0x... or base58)"
-          placeholderTextColor="#999"
+          placeholder={t('enter_wallet_address')}
+          placeholderTextColor={AppTheme.colors.textMuted}
           multiline={false}
           autoCapitalize="none"
           autoCorrect={false}
         />
-
-        <Text style={styles.label}>Blockchain</Text>
-        <View style={styles.chainSelector}>
-          {chains.map((chainOption) => (
-            <TouchableOpacity
-              key={chainOption.value}
-              style={[
-                styles.chainOption,
-                chain === chainOption.value && styles.chainOptionSelected,
-              ]}
-              onPress={() => setChain(chainOption.value)}
-            >
-              <Text
-                style={[
-                  styles.chainOptionText,
-                  chain === chainOption.value && styles.chainOptionTextSelected,
-                ]}
-              >
-                {chainOption.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity
@@ -107,7 +80,7 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
             onPress={onCancel}
             disabled={loading}
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={styles.cancelButtonText}>{t('cancel')}</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -116,7 +89,7 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
             disabled={loading}
           >
             <Text style={styles.addButtonText}>
-              {loading ? 'Adding...' : 'Add Wallet'}
+              {loading ? t('adding') : t('add_wallet')}
             </Text>
           </TouchableOpacity>
         </View>
@@ -127,111 +100,73 @@ export const AddTrackedWalletForm: React.FC<AddTrackedWalletFormProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
-    borderRadius: 16,
-    padding: 20,
-    margin: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.lg,
+    padding: AppTheme.spacing.xl,
+    margin: AppTheme.spacing.md,
+    ...AppTheme.shadows.card,
   },
   title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    ...AppTheme.typography.subtitle,
+    color: AppTheme.colors.textDark,
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: AppTheme.spacing.sm,
   },
   subtitle: {
-    fontSize: 14,
-    color: '#666',
+    ...AppTheme.typography.body,
+    color: AppTheme.colors.textMuted,
     textAlign: 'center',
-    marginBottom: 20,
+    marginBottom: AppTheme.spacing.xl,
   },
   form: {
-    gap: 16,
+    gap: AppTheme.spacing.md,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
+    ...AppTheme.typography.label,
+    color: AppTheme.colors.textDark,
+    marginBottom: AppTheme.spacing.xs,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
+    borderColor: AppTheme.colors.border,
+    borderRadius: AppTheme.borderRadius.md,
+    padding: AppTheme.spacing.md,
     fontSize: 16,
-    backgroundColor: '#f9f9f9',
-    color: '#333',
-  },
-  pickerContainer: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    backgroundColor: '#f9f9f9',
-  },
-  picker: {
-    height: 50,
-  },
-  chainSelector: {
-    gap: 8,
-  },
-  chainOption: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    padding: 12,
-    backgroundColor: '#f9f9f9',
-  },
-  chainOptionSelected: {
-    borderColor: '#007AFF',
-    backgroundColor: '#e6f3ff',
-  },
-  chainOptionText: {
-    fontSize: 16,
-    color: '#333',
-    textAlign: 'center',
-  },
-  chainOptionTextSelected: {
-    color: '#007AFF',
-    fontWeight: '600',
+    backgroundColor: AppTheme.colors.cardInner,
+    color: AppTheme.colors.textDark,
   },
   buttonContainer: {
     flexDirection: 'row',
-    gap: 12,
-    marginTop: 8,
+    gap: AppTheme.spacing.md,
+    marginTop: AppTheme.spacing.md,
   },
   button: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 8,
+    paddingVertical: AppTheme.spacing.md,
+    paddingHorizontal: AppTheme.spacing.lg,
+    borderRadius: AppTheme.borderRadius.md,
     alignItems: 'center',
   },
   cancelButton: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: AppTheme.colors.cardInner,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: AppTheme.colors.border,
   },
   cancelButtonText: {
-    color: '#666',
+    color: AppTheme.colors.textDark,
     fontSize: 16,
     fontWeight: '600',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: AppTheme.colors.primary,
   },
   addButtonText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
 });
 

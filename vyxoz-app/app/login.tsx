@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   View,
   Text,
@@ -11,9 +12,12 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../contexts/AuthContext';
+import { useBiometricAuth } from '../hooks/useBiometricAuth';
 import { router } from 'expo-router';
-import DebugInfo from '../components/DebugInfo';
+import { AppTheme } from '@/constants/theme';
+// debug/test UI removed for production
 
 // Web-safe alert function
 const showAlert = (title: string, message: string) => {
@@ -28,19 +32,85 @@ const showAlert = (title: string, message: string) => {
 };
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [lastTestUser, setLastTestUser] = useState<{email: string, password: string} | null>(null);
+  
   const { login, register, isLoading, isAuthenticated } = useAuth();
+  const { 
+    isAvailable, 
+    isEnabled, 
+    biometricType, 
+    authenticate, 
+    getStoredCredentials,
+    checkBiometricAvailability 
+  } = useBiometricAuth();
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.replace('/(tabs)');
+      router.replace('/portfolio');
     }
   }, [isAuthenticated]);
+
+  // Check biometric availability on mount
+  useEffect(() => {
+    checkBiometricAvailability();
+  }, []);
+
+  const getBiometricIcon = () => {
+    switch (biometricType) {
+      case 'facial':
+        return 'scan-outline';
+      case 'fingerprint':
+        return 'finger-print-outline';
+      case 'iris':
+        return 'eye-outline';
+      default:
+        return 'finger-print-outline';
+    }
+  };
+
+  const getBiometricLabel = () => {
+    return t('login_with_biometric') || 'Login with Biometry';
+  };
+
+  const handleBiometricLogin = async () => {
+    try {
+      // First authenticate with biometric
+      const authResult = await authenticate(t('authenticate_to_login') || 'Authenticate to login');
+      
+      if (!authResult.success) {
+        if (authResult.error !== 'Authentication cancelled') {
+          showAlert(t('error') || 'Error', authResult.error || t('biometric_failed') || 'Biometric authentication failed');
+        }
+        return;
+      }
+
+      // Get stored credentials
+      const credentials = await getStoredCredentials();
+      if (!credentials) {
+        showAlert(
+          t('error') || 'Error', 
+          t('no_stored_credentials') || 'No stored credentials found. Please login with email and password first.'
+        );
+        return;
+      }
+
+      // Login with stored credentials
+      const result = await login(credentials.email, credentials.password);
+      if (result.success) {
+        router.replace('/portfolio');
+      } else {
+        showAlert(t('login_failed') || 'Login Failed', result.message);
+      }
+    } catch (error) {
+      console.error('Biometric login error:', error);
+      showAlert(t('error') || 'Error', t('something_went_wrong') || 'Something went wrong');
+    }
+  };
 
   const handleSubmit = async () => {
     if (isLoginMode) {
@@ -52,7 +122,7 @@ export default function LoginScreen() {
 
       const result = await login(email, password);
       if (result.success) {
-        router.replace('/(tabs)');
+        router.replace('/portfolio');
       } else {
         showAlert('Login Failed', result.message);
       }
@@ -89,37 +159,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleTestRegister = async () => {
-    const testUsername = `testuser_${Date.now()}`;
-    const testEmail = `test${Date.now()}@example.com`;
-    const testPassword = 'test123456';
-
-    // Store the test user credentials for login later
-    setLastTestUser({ email: testEmail, password: testPassword });
-
-    // Fill form fields 
-    setUsername(testUsername);
-    setEmail(testEmail);
-    setPassword(testPassword);
-    setConfirmPassword(testPassword);
-    setIsLoginMode(false);
-
-    // Auto-submit after a brief delay
-    setTimeout(async () => {
-      const result = await register(testUsername, testEmail, testPassword);
-      if (result.success) {
-        showAlert('Test Registration Success', `Created user: ${testUsername}\nEmail: ${testEmail}\nYou can now use Test Login!`);
-        setIsLoginMode(true);
-        // Clear form
-        setUsername('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
-      } else {
-        showAlert('Test Registration Failed', result.message);
-      }
-    }, 500);
-  };
+  
 
   const toggleMode = () => {
     setIsLoginMode(!isLoginMode);
@@ -130,26 +170,7 @@ export default function LoginScreen() {
     setConfirmPassword('');
   };
 
-  const handleTestLogin = async () => {
-    // Use the last registered test user if available, otherwise use the fallback
-    const testEmail = lastTestUser?.email || 'test@example.com';
-    const testPassword = lastTestUser?.password || 'test123456';
-
-    // Fill form fields
-    setEmail(testEmail);
-    setPassword(testPassword);
-    setIsLoginMode(true);
-
-    // Auto-submit after a brief delay
-    setTimeout(async () => {
-      const result = await login(testEmail, testPassword);
-      if (result.success) {
-        showAlert('Test Login Success', 'Logged in with test account');
-      } else {
-        showAlert('Test Login Failed', `${result.message}\n\nTip: Try creating a test user first!`);
-      }
-    }, 500);
-  };
+  
 
   return (
     <KeyboardAvoidingView 
@@ -159,20 +180,20 @@ export default function LoginScreen() {
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.formContainer}>
           <Text style={styles.title}>
-            {isLoginMode ? 'Welcome Back' : 'Create Account'}
+            {isLoginMode ? t('login_title') : t('register_title')}
           </Text>
           <Text style={styles.subtitle}>
-            {isLoginMode ? 'Sign in to continue' : 'Sign up to get started'}
+            {isLoginMode ? t('login_subtitle') : t('register_subtitle')}
           </Text>
 
           {!isLoginMode && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>{t('username')}</Text>
               <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Enter your username"
+                placeholder={t('username')}
                 placeholderTextColor="#999"
                 autoCapitalize="none"
               />
@@ -180,12 +201,12 @@ export default function LoginScreen() {
           )}
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t('email')}</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
-              placeholder="Enter your email"
+              placeholder={t('email')}
               placeholderTextColor="#999"
               keyboardType="email-address"
               autoCapitalize="none"
@@ -194,12 +215,12 @@ export default function LoginScreen() {
           </View>
 
           <View style={styles.inputContainer}>
-            <Text style={styles.label}>Password</Text>
+            <Text style={styles.label}>{t('password')}</Text>
             <TextInput
               style={styles.input}
               value={password}
               onChangeText={setPassword}
-              placeholder="Enter your password"
+              placeholder={t('password')}
               placeholderTextColor="#999"
               secureTextEntry
               autoComplete="password"
@@ -208,12 +229,12 @@ export default function LoginScreen() {
 
           {!isLoginMode && (
             <View style={styles.inputContainer}>
-              <Text style={styles.label}>Confirm Password</Text>
+              <Text style={styles.label}>{t('confirm_password')}</Text>
               <TextInput
                 style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Confirm your password"
+                placeholder={t('confirm_password')}
                 placeholderTextColor="#999"
                 secureTextEntry
               />
@@ -229,7 +250,7 @@ export default function LoginScreen() {
               <ActivityIndicator color="#fff" />
             ) : (
               <Text style={styles.submitButtonText}>
-                {isLoginMode ? 'Sign In' : 'Sign Up'}
+                {isLoginMode ? t('sign_in') : t('sign_up')}
               </Text>
             )}
           </TouchableOpacity>
@@ -237,40 +258,32 @@ export default function LoginScreen() {
           <TouchableOpacity onPress={toggleMode} style={styles.toggleButton}>
             <Text style={styles.toggleButtonText}>
               {isLoginMode
-                ? "Don't have an account? Sign Up"
-                : 'Already have an account? Sign In'}
+                ? t('dont_have_account')
+                : t('already_have_account')}
             </Text>
           </TouchableOpacity>
 
-          {/* Debug Info - Only show in development */}
-          {__DEV__ && <DebugInfo />}
-
-          {/* Test Buttons - Only show in development */}
-          {__DEV__ && (
-            <View style={styles.testButtonsContainer}>
-              <Text style={styles.testSectionTitle}>🚀 Quick Test Actions</Text>
+          {/* Biometric Login Button - show in login mode when biometric is available */}
+          {isLoginMode && isAvailable && (
+            <View style={styles.biometricSection}>
+              <View style={styles.dividerContainer}>
+                <View style={styles.divider} />
+                <Text style={styles.dividerText}>{t('or') || 'or'}</Text>
+                <View style={styles.divider} />
+              </View>
               
               <TouchableOpacity
-                style={[styles.testButton, styles.testRegisterButton]}
-                onPress={handleTestRegister}
+                style={[styles.biometricButton, isLoading && styles.disabledButton]}
+                onPress={handleBiometricLogin}
                 disabled={isLoading}
               >
-                <Text style={styles.testButtonText}>
-                  ⚡ Create Test User
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.testButton, styles.testLoginButton]}
-                onPress={handleTestLogin}
-                disabled={isLoading}
-              >
-                <Text style={styles.testButtonText}>
-                  🔑 Login {lastTestUser ? 'with Test User' : 'with Default User'}
-                </Text>
+                <Ionicons name={getBiometricIcon()} size={24} color="#007AFF" />
+                <Text style={styles.biometricButtonText}>{getBiometricLabel()}</Text>
               </TouchableOpacity>
             </View>
           )}
+
+          {/* Debug and test buttons removed */}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -280,95 +293,111 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: AppTheme.colors.background,
+  },
+  languageSelector: {
+    position: 'absolute',
+    top: 40,
+    right: 20,
+    flexDirection: 'row',
+    zIndex: 10,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    borderRadius: AppTheme.borderRadius.xl,
+    paddingVertical: AppTheme.spacing.xs,
+    paddingHorizontal: 10,
+    ...AppTheme.shadows.card,
+  },
+  langButton: {
+    marginHorizontal: AppTheme.spacing.xs,
+    paddingHorizontal: AppTheme.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: AppTheme.borderRadius.md,
+    backgroundColor: AppTheme.colors.cardInner,
+  },
+  langButtonActive: {
+    backgroundColor: AppTheme.colors.primary,
+  },
+  langText: {
+    fontWeight: 'bold',
+    color: AppTheme.colors.textDark,
   },
   scrollContainer: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: AppTheme.spacing.lg,
   },
   formContainer: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
+    backgroundColor: AppTheme.colors.card,
+    borderRadius: AppTheme.borderRadius.lg,
     padding: 30,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3.84,
-    elevation: 5,
+    ...AppTheme.shadows.card,
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
+    ...AppTheme.typography.title,
     textAlign: 'center',
-    marginBottom: 8,
-    color: '#333',
+    marginBottom: AppTheme.spacing.sm,
+    color: AppTheme.colors.textDark,
   },
   subtitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     textAlign: 'center',
     marginBottom: 30,
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: AppTheme.spacing.lg,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#333',
+    ...AppTheme.typography.label,
+    marginBottom: AppTheme.spacing.sm,
+    color: AppTheme.colors.textDark,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
+    borderColor: AppTheme.colors.border,
+    borderRadius: AppTheme.borderRadius.sm,
     padding: 15,
-    fontSize: 16,
-    backgroundColor: '#fafafa',
+    ...AppTheme.typography.body,
+    backgroundColor: AppTheme.colors.cardInner,
   },
   submitButton: {
-    backgroundColor: '#007AFF',
-    borderRadius: 8,
+    backgroundColor: AppTheme.colors.primary,
+    borderRadius: AppTheme.borderRadius.sm,
     padding: 15,
     alignItems: 'center',
     marginTop: 10,
   },
   disabledButton: {
-    backgroundColor: '#ccc',
+    backgroundColor: AppTheme.colors.border,
   },
   submitButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
+    color: AppTheme.colors.card,
+    ...AppTheme.typography.sectionTitle,
   },
   toggleButton: {
-    marginTop: 20,
+    marginTop: AppTheme.spacing.lg,
     alignItems: 'center',
   },
   toggleButtonText: {
-    color: '#007AFF',
-    fontSize: 16,
+    color: AppTheme.colors.primary,
+    ...AppTheme.typography.body,
   },
   testButtonsContainer: {
     marginTop: 30,
-    paddingTop: 20,
+    paddingTop: AppTheme.spacing.lg,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
+    borderTopColor: AppTheme.colors.border,
   },
   testSectionTitle: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
     textAlign: 'center',
     marginBottom: 15,
-    color: '#666',
+    color: AppTheme.colors.textMuted,
   },
   testButton: {
-    borderRadius: 8,
-    padding: 12,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: AppTheme.spacing.md,
     alignItems: 'center',
     marginBottom: 10,
     borderWidth: 2,
@@ -376,14 +405,48 @@ const styles = StyleSheet.create({
   },
   testRegisterButton: {
     backgroundColor: '#E8F5E8',
-    borderColor: '#4CAF50',
+    borderColor: AppTheme.colors.success,
   },
   testLoginButton: {
     backgroundColor: '#E3F2FD',
-    borderColor: '#2196F3',
+    borderColor: AppTheme.colors.primary,
   },
   testButtonText: {
-    fontSize: 16,
+    ...AppTheme.typography.body,
     fontWeight: '600',
+  },
+  biometricSection: {
+    marginTop: AppTheme.spacing.xl,
+  },
+  dividerContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: AppTheme.spacing.lg,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: AppTheme.colors.border,
+  },
+  dividerText: {
+    paddingHorizontal: AppTheme.spacing.md,
+    color: AppTheme.colors.textMuted,
+    ...AppTheme.typography.body,
+  },
+  biometricButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: AppTheme.colors.primaryLight,
+    borderRadius: AppTheme.borderRadius.sm,
+    padding: 15,
+    borderWidth: 1,
+    borderColor: AppTheme.colors.primary,
+  },
+  biometricButtonText: {
+    color: AppTheme.colors.primary,
+    ...AppTheme.typography.body,
+    fontWeight: '600',
+    marginLeft: 10,
   },
 });

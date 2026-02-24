@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a2e;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            overflow: hidden;
+        }
+        #container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        #header {
+            padding: 12px 16px;
+            background: #16213e;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        #token-info {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        #token-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #fff;
+        }
+        #token-symbol {
+            font-size: 14px;
+            color: #888;
+            margin-left: 8px;
+        }
+        #current-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: #fff;
+        }
+        #price-change {
+            font-size: 14px;
+            margin-left: 8px;
+        }
+        .positive { color: #26a69a; }
+        .negative { color: #ef5350; }
+        #timeframe-buttons {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        .timeframe-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #2a2a4a;
+            color: #888;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .timeframe-btn.active {
+            background: #007AFF;
+            color: #fff;
+        }
+        .timeframe-btn:hover {
+            background: #3a3a5a;
+        }
+        #chart-type-buttons {
+            display: flex;
+            gap: 8px;
+            padding: 8px 0;
+        }
+        .chart-type-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background: #2a2a4a;
+            color: #888;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .chart-type-btn.active {
+            background: #34C759;
+            color: #fff;
+        }
+        #chart {
+            flex: 1;
+            width: 100%;
+        }
+        #stats {
+            padding: 12px 16px;
+            background: #16213e;
+            border-top: 1px solid #2a2a4a;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-label {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 4px;
+        }
+        .stat-value {
+            font-size: 13px;
+            color: #fff;
+            font-weight: 600;
+        }
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 16px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #2a2a4a;
+            border-top-color: #007AFF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="header">
+            <div id="token-info">
+                <div>
+                    <span id="token-name">Loading...</span>
+                    <span id="token-symbol"></span>
+                </div>
+                <div>
+                    <span id="current-price">$0.00</span>
+                    <span id="price-change" class="positive">+0.00%</span>
+                </div>
+            </div>
+            <div id="timeframe-buttons">
+                <button class="timeframe-btn active" data-timeframe="1d">1D</button>
+                <button class="timeframe-btn" data-timeframe="7d">7D</button>
+                <button class="timeframe-btn" data-timeframe="14d">14D</button>
+                <button class="timeframe-btn" data-timeframe="30d">1M</button>
+                <button class="timeframe-btn" data-timeframe="90d">3M</button>
+                <button class="timeframe-btn" data-timeframe="365d">1Y</button>
+            </div>
+            <div id="chart-type-buttons">
+                <button class="chart-type-btn active" data-type="candlestick">Candles</button>
+                <button class="chart-type-btn" data-type="line">Line</button>
+                <button class="chart-type-btn" data-type="area">Area</button>
+            </div>
+        </div>
+        <div id="chart"></div>
+        <div id="stats">
+            <div class="stat-item">
+                <div class="stat-label">24h High</div>
+                <div class="stat-value" id="stat-high">$0.00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">24h Low</div>
+                <div class="stat-value" id="stat-low">$0.00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">24h Volume</div>
+                <div class="stat-value" id="stat-volume">$0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Market Cap</div>
+                <div class="stat-value" id="stat-mcap">$0</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">ATH</div>
+                <div class="stat-value" id="stat-ath">$0.00</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">ATL</div>
+                <div class="stat-value" id="stat-atl">$0.00</div>
+            </div>
+        </div>
+    </div>
+    <div id="loading">
+        <div class="spinner"></div>
+        Loading chart...
+    </div>
+
+    <script>
+        let chart = null;
+        let currentSeries = null;
+        let currentData = null;
+        let currentTimeframe = '1d';
+        let currentChartType = 'candlestick';
+
+        // Chart configuration
+        const chartOptions = {
+            layout: {
+                background: { type: 'solid', color: '#1a1a2e' },
+                textColor: '#d1d4dc',
+            },
+            grid: {
+                vertLines: { color: '#2a2a4a' },
+                horzLines: { color: '#2a2a4a' },
+            },
+            crosshair: {
+                mode: LightweightCharts.CrosshairMode.Normal,
+            },
+            rightPriceScale: {
+                borderColor: '#2a2a4a',
+            },
+            timeScale: {
+                borderColor: '#2a2a4a',
+                timeVisible: true,
+                secondsVisible: false,
+            },
+            handleScroll: {
+                vertTouchDrag: false,
+            },
+        };
+
+        // Initialize chart
+        function initChart() {
+            const container = document.getElementById('chart');
+            chart = LightweightCharts.createChart(container, {
+                ...chartOptions,
+                width: container.clientWidth,
+                height: container.clientHeight,
+            });
+
+            // Handle resize
+            window.addEventListener('resize', () => {
+                chart.applyOptions({
+                    width: container.clientWidth,
+                    height: container.clientHeight,
+                });
+            });
+        }
+
+        // Format number for display
+        function formatNumber(num, decimals = 2) {
+            if (num === null || num === undefined) return 'N/A';
+            if (num >= 1e12) return '$' + (num / 1e12).toFixed(2) + 'T';
+            if (num >= 1e9) return '$' + (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return '$' + (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return '$' + (num / 1e3).toFixed(2) + 'K';
+            return '$' + num.toFixed(decimals);
+        }
+
+        function formatPrice(num) {
+            if (num === null || num === undefined) return '$0.00';
+            if (num < 0.01) return '$' + num.toFixed(6);
+            if (num < 1) return '$' + num.toFixed(4);
+            return '$' + num.toFixed(2);
+        }
+
+        // Update header info
+        function updateHeader(data) {
+            document.getElementById('token-name').textContent = data.name || 'Unknown';
+            document.getElementById('token-symbol').textContent = data.symbol ? `(${data.symbol})` : '';
+            document.getElementById('current-price').textContent = formatPrice(data.current_price_usd);
+            
+            const change = data.price_change_percentage_24h || 0;
+            const changeEl = document.getElementById('price-change');
+            changeEl.textContent = (change >= 0 ? '+' : '') + change.toFixed(2) + '%';
+            changeEl.className = change >= 0 ? 'positive' : 'negative';
+        }
+
+        // Update stats
+        function updateStats(data) {
+            document.getElementById('stat-high').textContent = formatPrice(data.high_24h_usd);
+            document.getElementById('stat-low').textContent = formatPrice(data.low_24h_usd);
+            document.getElementById('stat-volume').textContent = formatNumber(data.total_volume_24h_usd);
+            document.getElementById('stat-mcap').textContent = formatNumber(data.market_cap_usd);
+            document.getElementById('stat-ath').textContent = formatPrice(data.ath_usd);
+            document.getElementById('stat-atl').textContent = formatPrice(data.atl_usd);
+        }
+
+        // Get OHLC data for timeframe
+        function getOHLCData(data, timeframe) {
+            const key = `ohlc_${timeframe}`;
+            const ohlcData = data[key] || data.ohlc_1d || [];
+            
+            return ohlcData.map(candle => ({
+                time: Math.floor(candle[0] / 1000),
+                open: candle[1],
+                high: candle[2],
+                low: candle[3],
+                close: candle[4],
+            })).sort((a, b) => a.time - b.time);
+        }
+
+        // Get price data for timeframe
+        function getPriceData(data, timeframe) {
+            const key = `prices_${timeframe}`;
+            const priceData = data[key] || data.prices_1d || [];
+            
+            return priceData.map(point => ({
+                time: Math.floor(point[0] / 1000),
+                value: point[1],
+            })).sort((a, b) => a.time - b.time);
+        }
+
+        // Render chart with current settings
+        function renderChart() {
+            if (!currentData || !chart) return;
+
+            // Remove existing series
+            if (currentSeries) {
+                chart.removeSeries(currentSeries);
+                currentSeries = null;
+            }
+
+            if (currentChartType === 'candlestick') {
+                const ohlcData = getOHLCData(currentData, currentTimeframe);
+                if (ohlcData.length > 0) {
+                    currentSeries = chart.addCandlestickSeries({
+                        upColor: '#26a69a',
+                        downColor: '#ef5350',
+                        borderDownColor: '#ef5350',
+                        borderUpColor: '#26a69a',
+                        wickDownColor: '#ef5350',
+                        wickUpColor: '#26a69a',
+                    });
+                    currentSeries.setData(ohlcData);
+                }
+            } else if (currentChartType === 'line') {
+                const priceData = getPriceData(currentData, currentTimeframe);
+                if (priceData.length > 0) {
+                    currentSeries = chart.addLineSeries({
+                        color: '#007AFF',
+                        lineWidth: 2,
+                    });
+                    currentSeries.setData(priceData);
+                }
+            } else if (currentChartType === 'area') {
+                const priceData = getPriceData(currentData, currentTimeframe);
+                if (priceData.length > 0) {
+                    currentSeries = chart.addAreaSeries({
+                        topColor: 'rgba(0, 122, 255, 0.4)',
+                        bottomColor: 'rgba(0, 122, 255, 0.0)',
+                        lineColor: '#007AFF',
+                        lineWidth: 2,
+                    });
+                    currentSeries.setData(priceData);
+                }
+            }
+
+            chart.timeScale().fitContent();
+        }
+
+        // Handle timeframe button clicks
+        document.querySelectorAll('.timeframe-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.timeframe-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentTimeframe = btn.dataset.timeframe;
+                renderChart();
+            });
+        });
+
+        // Handle chart type button clicks
+        document.querySelectorAll('.chart-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.chart-type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentChartType = btn.dataset.type;
+                renderChart();
+            });
+        });
+
+        // Receive data from React Native
+        function receiveData(data) {
+            document.getElementById('loading').style.display = 'none';
+            currentData = data;
+            updateHeader(data);
+            updateStats(data);
+            renderChart();
+        }
+
+        // Initialize
+        initChart();
+
+        // Listen for messages from React Native
+        window.addEventListener('message', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'tradingData') {
+                    receiveData(data.payload);
+                }
+            } catch (e) {
+                console.error('Error parsing message:', e);
+            }
+        });
+
+        // Also handle Android WebView messages
+        document.addEventListener('message', (event) => {
+            try {
+                const data = JSON.parse(event.data);
+                if (data.type === 'tradingData') {
+                    receiveData(data.payload);
+                }
+            } catch (e) {
+                console.error('Error parsing message:', e);
+            }
+        });
+
+        // Notify React Native that chart is ready
+        if (window.ReactNativeWebView) {
+            window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'chartReady' }));
+        }
+    </script>
+</body>
+</html>

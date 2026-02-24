@@ -5,7 +5,7 @@ import { SymbolWeight, SymbolViewProps } from 'expo-symbols';
 import { ComponentProps } from 'react';
 import { OpaqueColorValue, type StyleProp, type TextStyle } from 'react-native';
 
-type IconMapping = Record<SymbolViewProps['name'], ComponentProps<typeof MaterialIcons>['name']>;
+type IconMapping = Record<string, ComponentProps<typeof MaterialIcons>['name']>;
 type IconSymbolName = keyof typeof MAPPING;
 
 /**
@@ -18,6 +18,28 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  // Tab navigation icons
+  'chart.line.uptrend.xyaxis': 'trending-up',
+  'folder.fill': 'folder',
+  'chart.bar.fill': 'bar-chart',
+  'book.fill': 'book',
+  // Newly added mappings for tokens & news tabs
+  // Using existing MaterialIcons names to satisfy type constraints
+  // 'attach-money' chosen for tokens; 'article' chosen for news
+  'bitcoinsign.circle.fill': 'attach-money',
+  'newspaper.fill': 'article',
+  // Additional useful icons
+  'gear': 'settings',
+  'plus': 'add',
+  'minus': 'remove',
+  'person.fill': 'person',
+  'bell.fill': 'notifications',
+  'search': 'search',
+  'refresh': 'refresh',
+  'trash.fill': 'delete',
+  'pencil': 'edit',
+  'eye.fill': 'visibility',
+  'eye.slash.fill': 'visibility-off',
 } as IconMapping;
 
 /**
