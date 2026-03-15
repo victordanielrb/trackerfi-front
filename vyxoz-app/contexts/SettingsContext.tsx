@@ -3,18 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { getApiUrl } from '../constants/api';
+import { Currency, SettingsContextType } from '../types/settings';
 
-type Currency = 'USD' | 'BRL' | 'EUR';
-
-interface SettingsContextType {
-  language: string;
-  setLanguage: (lng: string) => Promise<void>;
-  currency: Currency;
-  setCurrency: (c: Currency) => Promise<void>;
-  isReady: boolean;
-  prices: { brl?: number; eur?: number } | null;
-  fetchPrices: () => Promise<{ brl?: number; eur?: number } | null>;
-}
+export type { Currency, SettingsContextType } from '../types/settings';
 
 const SettingsContext = createContext<SettingsContextType | undefined>(undefined);
 
