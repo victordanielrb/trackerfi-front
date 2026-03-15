@@ -1,49 +1,26 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Alert, Platform } from 'react-native';
 import { API_CONFIG, getApiUrl } from '../constants/api';
+import { User, AuthContextType, AuthProviderProps } from '../types/auth';
+import { secureStorage } from './SecureStorageContext';
 
-// Types
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  user_type: string;
-  status: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  token: string | null;
-  login: (email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  register: (username: string, email: string, password: string) => Promise<{ success: boolean; message: string }>;
-  logout: () => Promise<void>;
-  isLoading: boolean;
-  isAuthenticated: boolean;
-}
+export type { User, AuthContextType, AuthProviderProps } from '../types/auth';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 // Web-safe alert function
 const showAlert = (title: string, message: string) => {
   if (Platform.OS === 'web') {
-    // For web, use console.error and window.alert as fallback
     console.error(`${title}: ${message}`);
     if (typeof window !== 'undefined' && window.alert) {
       window.alert(`${title}: ${message}`);
     }
   } else {
-    // For native platforms, use React Native Alert
     Alert.alert(title, message);
   }
 };
-
-
-
-interface AuthProviderProps {
-  children: ReactNode;
-}
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -114,7 +91,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const { token: newToken, user: userData } = response.data.data;
         
         // Store in AsyncStorage
-        await AsyncStorage.setItem('authToken', newToken);
+        await secureStorage.setItem('authToken', newToken);
         await AsyncStorage.setItem('user', JSON.stringify(userData));
         
         // Update state
